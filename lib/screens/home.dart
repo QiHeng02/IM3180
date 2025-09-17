@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:im3180/widgets/bottom_nav.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,13 +14,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   String? selectedCategory;
   String? selectedFood;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    // TODO: Add navigation logic for other tabs if needed
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +35,31 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Color(0xFF4A7CFF)),
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/');
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+
+              // Debug message and SnackBar
+              final user = FirebaseAuth.instance.currentUser;
+              if (user == null) {
+                print('✅ User is logged out');
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('User successfully logged out'),
+                    ),
+                  );
+                  Navigator.pushReplacementNamed(context, '/');
+                }
+              } else {
+                print('❌ User is still logged in: ${user.email}');
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('User still logged in: ${user.email}'),
+                    ),
+                  );
+                }
+              }
             },
           ),
         ],
@@ -157,24 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF4A7CFF),
-        unselectedItemColor: Colors.black54,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.check_box),
-            label: 'Tutorial',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        onTap: _onItemTapped,
-      ),
+      bottomNavigationBar: AppBottomNavBar(currentIndex: _selectedIndex),
     );
   }
 }
