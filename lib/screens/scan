@@ -1,0 +1,373 @@
+import 'package:flutter/material.dart';
+// Remove camera import for now - uncomment when package is added
+// import 'package:camera/camera.dart';
+
+class ScanScreen extends StatefulWidget {
+  const ScanScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ScanScreen> createState() => _ScanScreenState();
+}
+
+class _ScanScreenState extends State<ScanScreen> {
+  // Camera controller - uncomment when camera package is added
+  // CameraController? _cameraController;
+  // List<CameraDescription>? cameras;
+  bool _isCameraInitialized = false;
+  bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize camera when package is added
+    // _initializeCamera();
+  }
+
+  // Uncomment this method when camera package is added
+  /*
+  Future<void> _initializeCamera() async {
+    try {
+      cameras = await availableCameras();
+      if (cameras != null && cameras!.isNotEmpty) {
+        _cameraController = CameraController(
+          cameras![0],
+          ResolutionPreset.high,
+        );
+        await _cameraController!.initialize();
+        if (mounted) {
+          setState(() {
+            _isCameraInitialized = true;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error initializing camera: $e');
+    }
+  }
+  */
+
+  @override
+  void dispose() {
+    // Dispose camera when package is added
+    // _cameraController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.black),
+          onPressed: () {
+            // Open drawer or menu
+          },
+        ),
+        title: const Text(
+          'Scan pH Level',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 2,
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Camera Preview or Placeholder
+                      _buildCameraPreview(),
+                      
+                      // Overlay with scan frame
+                      if (!_isProcessing)
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: CustomPaint(
+                            size: Size(
+                              MediaQuery.of(context).size.width * 0.7,
+                              MediaQuery.of(context).size.width * 0.7,
+                            ),
+                            painter: ScanFramePainter(),
+                          ),
+                        ),
+                      
+                      // Instructions or Processing indicator
+                      if (!_isProcessing)
+                        Positioned(
+                          bottom: 40,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'Center your pH strip in the frame',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      
+                      if (_isProcessing)
+                        Container(
+                          color: Colors.black.withOpacity(0.7),
+                          child: const Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+                                Text(
+                                  'Analyzing pH level...',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            
+            // Scan Button
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isProcessing ? null : _handleScan,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF007AFF),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        _isProcessing ? 'Processing...' : 'Scan Now',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCameraPreview() {
+    // When camera package is added, uncomment the camera preview code
+    /*
+    if (_isCameraInitialized && _cameraController != null) {
+      return CameraPreview(_cameraController!);
+    }
+    */
+    
+    // Placeholder when camera is not available
+    return Container(
+      color: const Color(0xFFF0F0F0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.camera_alt_outlined,
+            size: 80,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Center your pH strip in the frame',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleScan() async {
+    setState(() {
+      _isProcessing = true;
+    });
+
+    // Simulate pH detection process
+    // In real implementation, this would:
+    // 1. Capture image from camera
+    // 2. Process image to detect pH strip colors
+    // 3. Calculate pH value based on color analysis
+    // 4. Connect to your pH sensor if using hardware
+    
+    await Future.delayed(const Duration(seconds: 2));
+    
+    // Mock pH value for demonstration
+    double phValue = 6.2;
+    String freshness = _calculateFreshness(phValue);
+    int hoursToConsume = _calculateConsumptionTime(phValue);
+    
+    if (mounted) {
+      setState(() {
+        _isProcessing = false;
+      });
+      
+      // Navigate to results screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ScanResultsScreen(
+            phValue: phValue,
+            freshness: freshness,
+            hoursToConsume: hoursToConsume,
+          ),
+        ),
+      );
+    }
+  }
+
+  String _calculateFreshness(double ph) {
+    if (ph >= 6.0 && ph <= 7.0) {
+      return 'fresh';
+    } else if (ph >= 5.0 && ph < 6.0) {
+      return 'moderate';
+    } else {
+      return 'spoiled';
+    }
+  }
+
+  int _calculateConsumptionTime(double ph) {
+    if (ph >= 6.0 && ph <= 7.0) {
+      return 48; // 48 hours for fresh items
+    } else if (ph >= 5.0 && ph < 6.0) {
+      return 24; // 24 hours for moderate freshness
+    } else {
+      return 0; // Should not consume
+    }
+  }
+}
+
+// Custom painter for scan frame corners
+class ScanFramePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF007AFF)
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final cornerLength = size.width * 0.1;
+    
+    // Top-left corner
+    canvas.drawLine(
+      Offset.zero,
+      Offset(cornerLength, 0),
+      paint,
+    );
+    canvas.drawLine(
+      Offset.zero,
+      Offset(0, cornerLength),
+      paint,
+    );
+
+    // Top-right corner
+    canvas.drawLine(
+      Offset(size.width - cornerLength, 0),
+      Offset(size.width, 0),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width, 0),
+      Offset(size.width, cornerLength),
+      paint,
+    );
+
+    // Bottom-left corner
+    canvas.drawLine(
+      Offset(0, size.height - cornerLength),
+      Offset(0, size.height),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(0, size.height),
+      Offset(cornerLength, size.height),
+      paint,
+    );
+
+    // Bottom-right corner
+    canvas.drawLine(
+      Offset(size.width - cornerLength, size.height),
+      Offset(size.width, size.height),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width, size.height - cornerLength),
+      Offset(size.width, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
