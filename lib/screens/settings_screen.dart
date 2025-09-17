@@ -38,14 +38,6 @@ class SettingsScreen extends StatelessWidget {
                   Navigator.pushNamed(context, '/change-password');
                 },
               ),
-              
-              _buildSettingsItem(
-                icon: Icons.person_outline,
-                title: 'Edit Profile',
-                onTap: () {
-                  Navigator.pushNamed(context, '/edit-profile');
-                },
-              ),
 
               const SizedBox(height: 24),
 
@@ -116,7 +108,7 @@ class SettingsScreen extends StatelessWidget {
               break;
             case 1:
               // Navigate to Profile
-              // Navigator.pushNamed(context, '/profile');
+              Navigator.pushNamed(context, '/edit-profile');
               break;
             case 2:
               // Navigate to Tutorial
