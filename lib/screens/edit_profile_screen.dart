@@ -284,8 +284,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Navigator.of(context).popUntil((route) => route.isFirst);
               break;
             case 1:
-              // Already on Profile screen
-              break;
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                );
+                break;
+
             case 2:
               // Navigate to Tutorial
               // Navigator.pushNamed(context, '/tutorial');
