@@ -58,7 +58,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           backgroundColor: Colors.white,
           foregroundColor: const Color(0xFF111827),
           elevation: 0,
-          automaticallyImplyLeading: false,
         ),
         body: SafeArea(
           child: SingleChildScrollView(

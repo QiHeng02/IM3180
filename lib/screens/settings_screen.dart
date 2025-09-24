@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:im3180/widgets/bottom_nav.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -30,12 +31,12 @@ class SettingsScreen extends StatelessWidget {
               // Account Security Section
               _buildSectionHeader('Account Security'),
               const SizedBox(height: 12),
-              
+
               _buildSettingsItem(
                 icon: Icons.lock_outline,
                 title: 'Change Password',
                 onTap: () {
-                  Navigator.pushNamed(context, '/change-password');
+                  Navigator.pushNamed(context, '/a');
                 },
               ),
 
@@ -44,7 +45,7 @@ class SettingsScreen extends StatelessWidget {
               // Notifications Section
               _buildSectionHeader('Notifications'),
               const SizedBox(height: 12),
-              
+
               _buildSettingsItem(
                 icon: Icons.notifications_outlined,
                 title: 'Receive expiry notifications',
@@ -57,69 +58,21 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // History Section
-              _buildSectionHeader('History'),
+              _buildSectionHeader('Profile'),
               const SizedBox(height: 12),
-              
+
               _buildSettingsItem(
-                icon: Icons.history,
-                title: 'View Past Records',
+                icon: Icons.person,
+                title: 'Edit Profile',
                 onTap: () {
-                  Navigator.pushNamed(context, '/history');
+                  Navigator.pushNamed(context, '/edit-profile');
                 },
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF2F6BFF),
-        unselectedItemColor: Colors.grey,
-        currentIndex: 3, // Settings tab selected (0-based index)
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.play_lesson_outlined),
-            activeIcon: Icon(Icons.play_lesson),
-            label: 'Tutorial',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        onTap: (index) {
-          // Handle navigation based on index
-          switch (index) {
-            case 0:
-              // Navigate to Home
-              Navigator.of(context).popUntil((route) => route.isFirst);
-              break;
-            case 1:
-              // Navigate to Profile
-              Navigator.pushNamed(context, '/edit-profile');
-              break;
-            case 2:
-              // Navigate to Tutorial
-              // Navigator.pushNamed(context, '/tutorial');
-              break;
-            case 3:
-              // Already on Settings screen
-              break;
-          }
-        },
-      ),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 3),
     );
   }
 
@@ -163,11 +116,7 @@ class SettingsScreen extends StatelessWidget {
                     color: const Color(0xFF2F6BFF).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    icon,
-                    color: const Color(0xFF2F6BFF),
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: const Color(0xFF2F6BFF), size: 20),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

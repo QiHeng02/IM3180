@@ -19,7 +19,7 @@ class AppBottomNavBar extends StatelessWidget {
         Navigator.pushReplacementNamed(context, '/tutorial1');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/a');
+        Navigator.pushReplacementNamed(context, '/settings');
         break;
     }
   }
@@ -32,7 +32,7 @@ class AppBottomNavBar extends StatelessWidget {
       unselectedItemColor: Colors.black54,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
         BottomNavigationBarItem(icon: Icon(Icons.check_box), label: 'Tutorial'),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
       ],
