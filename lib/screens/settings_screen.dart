@@ -30,7 +30,7 @@ class SettingsScreen extends StatelessWidget {
               // Account Security Section
               _buildSectionHeader('Account Security'),
               const SizedBox(height: 12),
-              
+
               _buildSettingsItem(
                 icon: Icons.lock_outline,
                 title: 'Change Password',
@@ -44,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
               // Notifications Section
               _buildSectionHeader('Notifications'),
               const SizedBox(height: 12),
-              
+
               _buildSettingsItem(
                 icon: Icons.notifications_outlined,
                 title: 'Receive expiry notifications',
@@ -59,7 +59,7 @@ class SettingsScreen extends StatelessWidget {
               // History Section
               _buildSectionHeader('History'),
               const SizedBox(height: 12),
-              
+
               _buildSettingsItem(
                 icon: Icons.history,
                 title: 'View Past Records',
@@ -163,11 +163,7 @@ class SettingsScreen extends StatelessWidget {
                     color: const Color(0xFF2F6BFF).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    icon,
-                    color: const Color(0xFF2F6BFF),
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: const Color(0xFF2F6BFF), size: 20),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

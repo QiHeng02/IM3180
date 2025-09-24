@@ -275,7 +275,8 @@ class ScanResultsScreen extends StatelessWidget {
             children: [
               // Position indicator
               Positioned(
-                left: _calculateIndicatorPosition() *
+                left:
+                    _calculateIndicatorPosition() *
                         (MediaQuery.of(context).size.width - 80) -
                     10,
                 top: 5,
@@ -285,10 +286,7 @@ class ScanResultsScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _getFreshnessColor(),
-                      width: 3,
-                    ),
+                    border: Border.all(color: _getFreshnessColor(), width: 3),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -308,9 +306,15 @@ class ScanResultsScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('0', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-            Text('3.5', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+            Text(
+              '3.5',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
             Text('7', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-            Text('10.5', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+            Text(
+              '10.5',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
             Text('14', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
           ],
         ),

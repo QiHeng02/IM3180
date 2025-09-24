@@ -10,7 +10,9 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController(text: 'Sarah Chen');
-  final _emailController = TextEditingController(text: 'sarah.chen@example.com');
+  final _emailController = TextEditingController(
+    text: 'sarah.chen@example.com',
+  );
   final _mobileController = TextEditingController(text: '+1 (555) 123-4567');
 
   @override
@@ -22,21 +24,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   OutlineInputBorder get _fieldBorder => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE6E8EF)),
-      );
+    borderRadius: BorderRadius.circular(12),
+    borderSide: const BorderSide(color: Color(0xFFE6E8EF)),
+  );
 
   InputDecoration _decoration(String label) => InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(fontSize: 14, color: Color(0xFF7B8190)),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        enabledBorder: _fieldBorder,
-        focusedBorder: _fieldBorder.copyWith(
-          borderSide: const BorderSide(color: Color(0xFF2F6BFF), width: 1.2),
-        ),
-      );
+    labelText: label,
+    labelStyle: const TextStyle(fontSize: 14, color: Color(0xFF7B8190)),
+    filled: true,
+    fillColor: Colors.white,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    enabledBorder: _fieldBorder,
+    focusedBorder: _fieldBorder.copyWith(
+      borderSide: const BorderSide(color: Color(0xFF2F6BFF), width: 1.2),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -286,9 +288,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             case 1:
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const EditProfileScreen()),
-                );
-                break;
+                MaterialPageRoute(
+                  builder: (context) => const EditProfileScreen(),
+                ),
+              );
+              break;
 
             case 2:
               // Navigate to Tutorial

@@ -169,7 +169,9 @@ class _ScanScreenState extends State<ScanScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
+                        _isProcessing
+                            ? Icons.hourglass_empty
+                            : Icons.camera_alt,
                         color: Colors.white,
                         size: 24,
                       ),
@@ -199,18 +201,11 @@ class _ScanScreenState extends State<ScanScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.camera_alt_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.camera_alt_outlined, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 20),
           Text(
             'Center your pH strip in the frame',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 16,
-            ),
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
           ),
         ],
       ),
@@ -317,7 +312,8 @@ class ScanResultsScreen extends StatelessWidget {
           child: Stack(
             children: [
               Positioned(
-                left: _calculateIndicatorPosition() *
+                left:
+                    _calculateIndicatorPosition() *
                         (MediaQuery.of(context).size.width - 80) -
                     10,
                 top: 5,
@@ -327,10 +323,7 @@ class ScanResultsScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _getFreshnessColor(),
-                      width: 3,
-                    ),
+                    border: Border.all(color: _getFreshnessColor(), width: 3),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -435,16 +428,8 @@ class ScanFramePainter extends CustomPainter {
     final cornerLength = size.width * 0.1;
 
     // Top-left corner
-    canvas.drawLine(
-      Offset.zero,
-      Offset(cornerLength, 0),
-      paint,
-    );
-    canvas.drawLine(
-      Offset.zero,
-      Offset(0, cornerLength),
-      paint,
-    );
+    canvas.drawLine(Offset.zero, Offset(cornerLength, 0), paint);
+    canvas.drawLine(Offset.zero, Offset(0, cornerLength), paint);
 
     // Top-right corner
     canvas.drawLine(

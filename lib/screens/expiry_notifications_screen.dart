@@ -15,15 +15,15 @@ class _ExpiryNotificationsScreenState extends State<ExpiryNotificationsScreen> {
 
   // Styles to match your Change Password screen
   OutlineInputBorder get _fieldBorder => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Color(0xFFE6E8EF)),
-      );
+    borderRadius: BorderRadius.circular(18),
+    borderSide: const BorderSide(color: Color(0xFFE6E8EF)),
+  );
 
   BoxDecoration get _tileDecoration => BoxDecoration(
-        color: const Color(0xFFF7F8FC),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE6E8EF)),
-      );
+    color: const Color(0xFFF7F8FC),
+    borderRadius: BorderRadius.circular(18),
+    border: Border.all(color: const Color(0xFFE6E8EF)),
+  );
 
   TextStyle get _labelStyle =>
       const TextStyle(fontSize: 12, color: Color(0xFF7B8190));
@@ -81,7 +81,10 @@ class _ExpiryNotificationsScreenState extends State<ExpiryNotificationsScreen> {
 
               // Enable toggle
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 decoration: _tileDecoration,
                 child: Row(
                   children: [
@@ -89,9 +92,13 @@ class _ExpiryNotificationsScreenState extends State<ExpiryNotificationsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Enable notifications',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w600)),
+                          const Text(
+                            'Enable notifications',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             'Get alerts before items expire',
@@ -116,15 +123,21 @@ class _ExpiryNotificationsScreenState extends State<ExpiryNotificationsScreen> {
                 child: IgnorePointer(
                   ignoring: disabled,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                     decoration: _tileDecoration,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Days before expiry',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w600)),
+                        const Text(
+                          'Days before expiry',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         const SizedBox(height: 6),
                         Text(
                           'Choose how many days in advance to notify',
@@ -144,17 +157,22 @@ class _ExpiryNotificationsScreenState extends State<ExpiryNotificationsScreen> {
                             const SizedBox(width: 12),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 10),
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                    color: const Color(0xFFE6E8EF)),
+                                  color: const Color(0xFFE6E8EF),
+                                ),
                               ),
                               child: Text(
                                 '$_daysBefore day${_daysBefore == 1 ? '' : 's'}',
                                 style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w600),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -196,8 +214,9 @@ class _ExpiryNotificationsScreenState extends State<ExpiryNotificationsScreen> {
                     final msg = _enabled
                         ? 'Saved • $_daysBefore day(s) before'
                         : 'Saved • Notifications disabled';
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(msg)));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(msg)));
                   },
                   child: const Text('Save Settings'),
                 ),
