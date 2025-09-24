@@ -10,6 +10,7 @@ import 'screens/change_password_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/edit_profile_screen.dart';
 import 'screens/expiry_notifications_screen.dart';
+import 'screens/history_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/edit-profile': (context) => const EditProfileScreen(),
         '/expiry-notifications': (context) => const ExpiryNotificationsScreen(),
         '/a': (context) => const ChangePasswordScreen(),
+        '/history': (context) => const HistoryScreen(),
       },
     );
   }

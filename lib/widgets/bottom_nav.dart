@@ -13,7 +13,7 @@ class AppBottomNavBar extends StatelessWidget {
         Navigator.pushReplacementNamed(context, '/home');
         break;
       case 1:
-        Navigator.pushReplacementNamed(context, '/profile');
+        Navigator.pushReplacementNamed(context, '/history');
         break;
       case 2:
         Navigator.pushReplacementNamed(context, '/tutorial1');
