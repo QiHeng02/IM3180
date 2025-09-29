@@ -51,7 +51,6 @@ class SettingsScreen extends StatelessWidget {
               _buildSettingsItem(
                 icon: Icons.notifications_outlined,
                 title: 'Receive expiry notifications',
-                subtitle: '7 days',
                 onTap: () {
                   Navigator.pushNamed(context, '/expiry-notifications');
                 },
@@ -92,7 +91,6 @@ class SettingsScreen extends StatelessWidget {
   Widget _buildSettingsItem({
     required IconData icon,
     required String title,
-    String? subtitle,
     required VoidCallback onTap,
   }) {
     return Container(
@@ -133,16 +131,6 @@ class SettingsScreen extends StatelessWidget {
                           color: Color(0xFF111827),
                         ),
                       ),
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF7B8190),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),

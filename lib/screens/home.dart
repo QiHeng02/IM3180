@@ -41,6 +41,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _ensureUserSelectionFields();
+  }
+
+  Future<void> _ensureUserSelectionFields() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final data = doc.data();
+      if (data == null ||
+          !data.containsKey('selectedCategory') ||
+          !data.containsKey('selectedFood')) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'selectedCategory': null,
+          'selectedFood': null,
+        }, SetOptions(merge: true));
+      }
+    }
+  }
+
   int _selectedIndex = 0;
   String? selectedCategory;
   String? selectedFood;
@@ -156,8 +181,43 @@ class _HomeScreenState extends State<HomeScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: () {
-                        // TODO: Handle submit
+                      onPressed: () async {
+                        if (selectedCategory == null || selectedFood == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Please select both category and food item.',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+                        final user = FirebaseAuth.instance.currentUser;
+                        if (user == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Not logged in!')),
+                          );
+                          return;
+                        }
+                        // Store selection in users collection
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(user.uid)
+                            .set({
+                              'selectedCategory': selectedCategory,
+                              'selectedFood': selectedFood,
+                            }, SetOptions(merge: true));
+                        debugPrint(
+                          'Stored for user ${user.uid}: category=${selectedCategory ?? "None"}, food=${selectedFood ?? "None"}',
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Saved! Category: ${selectedCategory ?? "None"}, Food: ${selectedFood ?? "None"}',
+                            ),
+                          ),
+                        );
+                        //Navigator.pushReplacementNamed(context, '/scan');
                       },
                       child: const Text(
                         'Submit',
