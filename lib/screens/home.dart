@@ -1,7 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:im3180/widgets/bottom_nav.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
+
+class LogoutButton extends StatelessWidget {
+  const LogoutButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.logout, color: Colors.red),
+      onPressed: () async {
+        await FirebaseAuth.instance.signOut();
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('User successfully logged out')),
+            );
+            Navigator.pushReplacementNamed(context, '/');
+          }
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('User still logged in: \\${user.email}')),
+            );
+          }
+        }
+      },
+    );
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,37 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
             fontSize: 22,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Color(0xFF4A7CFF)),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-
-              // Debug message and SnackBar
-              final user = FirebaseAuth.instance.currentUser;
-              if (user == null) {
-                print('✅ User is logged out');
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('User successfully logged out'),
-                    ),
-                  );
-                  Navigator.pushReplacementNamed(context, '/');
-                }
-              } else {
-                print('❌ User is still logged in: ${user.email}');
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('User still logged in: ${user.email}'),
-                    ),
-                  );
-                }
-              }
-            },
-          ),
-        ],
+        actions: const [LogoutButton()],
       ),
       //create dropdown menu from firestore collection "categories"
       body: StreamBuilder<QuerySnapshot>(

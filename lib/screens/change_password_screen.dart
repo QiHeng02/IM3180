@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:im3180/widgets/bottom_nav.dart';
+import 'home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -58,6 +59,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           backgroundColor: Colors.white,
           foregroundColor: const Color(0xFF111827),
           elevation: 0,
+          actions: const [LogoutButton()],
         ),
         body: SafeArea(
           child: SingleChildScrollView(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -24,6 +25,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       // Optional: update display name
       await userCredential.user!.updateDisplayName(_nameController.text.trim());
+
+      // Create Firestore user doc
+      final user = userCredential.user;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': user.email,
+          'name': _nameController.text.trim(),
+          'phone': '',
+        });
+      }
 
       // Navigate to HomeScreen after successful registration
       Navigator.pushReplacementNamed(context, '/');

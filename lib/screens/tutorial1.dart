@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'tutorial2.dart';
 
 class Tutorial1Screen extends StatelessWidget {
   const Tutorial1Screen({super.key});

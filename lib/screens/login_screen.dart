@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -29,11 +30,24 @@ class _LoginScreenState extends State<LoginScreen> {
     debugPrint('Attempting login with email: $email');
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
       debugPrint('Login successful for email: $email');
+
+      // Create Firestore user doc if not exists
+      final user = userCredential.user;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (!userDoc.exists) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .set({'email': user.email, 'name': '', 'phone': ''});
+        }
+      }
 
       // Navigate to HomeScreen
       if (mounted) {
@@ -67,7 +81,23 @@ class _LoginScreenState extends State<LoginScreen> {
         idToken: googleAuth.idToken,
       );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
+
+      // Create Firestore user doc if not exists
+      final user = userCredential.user;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (!userDoc.exists) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .set({'email': user.email, 'name': '', 'phone': ''});
+        }
+      }
 
       // Navigate to Tutorial1Screen
       Navigator.pushReplacementNamed(context, '/tutorial1');
@@ -85,6 +115,21 @@ class _LoginScreenState extends State<LoginScreen> {
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
           );
+
+      // Create Firestore user doc if not exists
+      final user = userCredential.user;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (!userDoc.exists) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .set({'email': user.email, 'name': '', 'phone': ''});
+        }
+      }
 
       // After signup, navigate to HomeScreen
       Navigator.pushReplacementNamed(context, '/tutorial1');

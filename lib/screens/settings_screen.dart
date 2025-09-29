@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:im3180/widgets/bottom_nav.dart';
+import 'home.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -18,6 +19,7 @@ class SettingsScreen extends StatelessWidget {
         foregroundColor: const Color(0xFF111827),
         elevation: 0,
         automaticallyImplyLeading: false,
+        actions: const [LogoutButton()],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
