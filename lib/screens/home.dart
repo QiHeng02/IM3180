@@ -217,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         );
-                        //Navigator.pushReplacementNamed(context, '/scan');
+                        Navigator.pushReplacementNamed(context, '/scan');
                       },
                       child: const Text(
                         'Submit',

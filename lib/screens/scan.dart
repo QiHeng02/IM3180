@@ -1,4 +1,12 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,18 +33,43 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  bool _isCameraInitialized = false;
   bool _isProcessing = false;
+  CameraController? _controller;
+  Future<void>? _initializeControllerFuture;
 
   @override
   void initState() {
     super.initState();
-    // Initialize camera when package is added
+    _initCamera();
+  }
+
+  Future<void> _initCamera() async {
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) return;
+      final backCamera = cameras.firstWhere(
+        (c) => c.lensDirection == CameraLensDirection.back,
+        orElse: () => cameras.first,
+      );
+      _controller = CameraController(
+        backCamera,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
+      _initializeControllerFuture = _controller!.initialize();
+      if (mounted) setState(() {});
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Camera init error: $e')));
+      }
+    }
   }
 
   @override
   void dispose() {
-    // Dispose camera when package is added
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -196,48 +229,116 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Widget _buildCameraPreview() {
-    return Container(
-      color: const Color(0xFFF0F0F0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.camera_alt_outlined, size: 80, color: Colors.grey[400]),
-          const SizedBox(height: 20),
-          Text(
-            'Center your pH strip in the frame',
-            style: TextStyle(color: Colors.grey[600], fontSize: 16),
-          ),
-        ],
-      ),
+    if (_controller == null || _initializeControllerFuture == null) {
+      return Container(
+        color: const Color(0xFFF0F0F0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.camera_alt_outlined, size: 80, color: Colors.grey[400]),
+            const SizedBox(height: 20),
+            Text(
+              'Initializing camera...',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+    return FutureBuilder<void>(
+      future: _initializeControllerFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return CameraPreview(_controller!);
+        }
+        return const Center(child: CircularProgressIndicator());
+      },
     );
   }
 
   Future<void> _handleScan() async {
-    setState(() {
-      _isProcessing = true;
-    });
+    try {
+      if (_initializeControllerFuture == null) return;
+      await _initializeControllerFuture;
 
-    await Future.delayed(const Duration(seconds: 2));
+      setState(() {
+        _isProcessing = true;
+      });
 
-    double phValue = 6.2;
-    String freshness = _calculateFreshness(phValue);
-    int hoursToConsume = _calculateConsumptionTime(phValue);
+      // User is already signed in per app flow
+      final uid = FirebaseAuth.instance.currentUser!.uid;
 
-    if (!mounted) return;
-    setState(() {
-      _isProcessing = false;
-    });
+      final XFile xfile = await _controller!.takePicture();
+      final File imageFile = File(xfile.path);
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      final storagePath = 'users/$uid/scans/$ts.jpg';
+      final storageRef = FirebaseStorage.instance.ref().child(storagePath);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ScanResultsScreen(
-          phValue: phValue,
-          freshness: freshness,
-          hoursToConsume: hoursToConsume,
+      final TaskSnapshot uploadSnap = await storageRef.putFile(imageFile);
+      final downloadUrl = await uploadSnap.ref.getDownloadURL();
+
+      // Simulate analysis
+      await Future.delayed(const Duration(seconds: 2));
+      double phValue = 6.2;
+      String freshness = _calculateFreshness(phValue);
+      int hoursToConsume = _calculateConsumptionTime(phValue);
+
+      // Save scan metadata to Firestore under the user
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('scans')
+          .doc(ts.toString())
+          .set({
+            'imageUrl': downloadUrl,
+            'storagePath': storagePath,
+            'phValue': phValue,
+            'freshness': freshness,
+            'hoursToConsume': hoursToConsume,
+            'createdAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+
+      if (!mounted) return;
+      setState(() {
+        _isProcessing = false;
+      });
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ScanResultsScreen(
+            phValue: phValue,
+            freshness: freshness,
+            hoursToConsume: hoursToConsume,
+            imageUrl: downloadUrl,
+          ),
         ),
-      ),
-    );
+      );
+
+      if (kDebugMode) {
+        print('✅ Photo uploaded: $downloadUrl');
+      }
+    } on FirebaseException catch (e) {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Firebase error (${e.code}): ${e.message ?? e}'),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error during scan/upload: $e')));
+    }
   }
 
   String _calculateFreshness(double ph) {
@@ -265,12 +366,14 @@ class ScanResultsScreen extends StatelessWidget {
   final double phValue;
   final String freshness;
   final int hoursToConsume;
+  final String? imageUrl;
 
   const ScanResultsScreen({
     super.key,
     required this.phValue,
     required this.freshness,
     required this.hoursToConsume,
+    this.imageUrl,
   });
 
   double _calculateIndicatorPosition() {
@@ -385,6 +488,18 @@ class ScanResultsScreen extends StatelessWidget {
               "Consume within: ${hoursToConsume > 0 ? '$hoursToConsume hours' : 'Not safe to consume'}",
               style: const TextStyle(fontSize: 18),
             ),
+            const SizedBox(height: 16),
+            if (imageUrl != null)
+              Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    imageUrl!,
+                    height: 220,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
             const SizedBox(height: 30),
             _buildPhScaleIndicator(context),
             const Spacer(),
