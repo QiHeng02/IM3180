@@ -1,153 +1,212 @@
 import 'package:flutter/material.dart';
-import 'package:im3180/widgets/bottom_nav.dart';
+import 'package:im3180/screens/home.dart';
 
-class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
+class ScanResultsScreen extends StatelessWidget {
+  final String imageUrl;
+  final double phValue;
+  final String freshness;
+  final int hoursToConsume;
 
-  @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
-}
+  const ScanResultsScreen({
+    super.key,
+    required this.imageUrl,
+    required this.phValue,
+    required this.freshness,
+    required this.hoursToConsume,
+  });
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    super.dispose();
+  Color _getFreshnessColor() {
+    switch (freshness.toLowerCase()) {
+      case 'fresh':
+        return const Color(0xFF4CAF50);
+      case 'moderate':
+        return const Color(0xFFFF9800);
+      case 'spoiled':
+        return const Color(0xFFF44336);
+      default:
+        return Colors.grey;
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Edit Profile'),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF111827),
-        elevation: 0,
-        automaticallyImplyLeading: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+  double _indicatorPosition() => phValue.clamp(0, 14) / 14.0;
+
+  Widget _phScaleIndicator(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          height: 40,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFFFF0000),
+                Color(0xFFFF6600),
+                Color(0xFFFFCC00),
+                Color(0xFF66FF00),
+                Color(0xFF00FF66),
+                Color(0xFF0066FF),
+                Color(0xFF6600FF),
+              ],
+            ),
+          ),
+          child: Stack(
             children: [
-              const Divider(height: 1),
-              const SizedBox(height: 20),
-
-              // Profile Picture Placeholder
-              Center(
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    const CircleAvatar(
-                      radius: 50,
-                      backgroundImage: AssetImage(
-                        'assets/profile_placeholder.png',
+              Positioned(
+                left:
+                    _indicatorPosition() *
+                        (MediaQuery.of(context).size.width - 80) -
+                    10,
+                top: 5,
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: _getFreshnessColor(), width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: const Color(0xFF2F6BFF),
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Name field
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE6E8EF)),
+                    ],
                   ),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Email field
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE6E8EF)),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Phone field
-              TextField(
-                controller: _phoneController,
-                decoration: InputDecoration(
-                  labelText: 'Phone',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE6E8EF)),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Save button
-              SizedBox(
-                height: 44,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2F6BFF),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 0,
-                  ),
-                  onPressed: () {
-                    // Save profile logic here
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Profile updated')),
-                    );
-                  },
-                  child: const Text('Save Changes'),
                 ),
               ),
             ],
           ),
         ),
-      ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            Text("0"),
+            Text("3.5"),
+            Text("7"),
+            Text("10.5"),
+            Text("14"),
+          ],
+        ),
+      ],
+    );
+  }
 
-      // Shared Bottom Nav with Profile tab highlighted
-      bottomNavigationBar: const AppBottomNavBar(currentIndex: 1),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        title: const Text('Scan Results'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  imageUrl,
+                  height: 220,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return const SizedBox(
+                      height: 220,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Text(
+                      'Image failed to load',
+                      style: TextStyle(color: Colors.red),
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'pH Value: ${phValue.toStringAsFixed(1)}',
+              style: const TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Freshness: $freshness',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: _getFreshnessColor(),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Consume within: ${hoursToConsume > 0 ? '$hoursToConsume hours' : 'Not safe to consume'}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 30),
+            _phScaleIndicator(context),
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue, // blue background
+                  foregroundColor: Colors.white, // white text
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Back to Scan',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                // changed from OutlinedButton
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HomeScreen()),
+                    (route) => false,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red, // red background
+                  foregroundColor: Colors.white, // white text
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Back to Home',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white, // ensure white text
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

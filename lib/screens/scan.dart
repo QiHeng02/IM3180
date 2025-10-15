@@ -1,41 +1,22 @@
 import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'scan_results.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ScanPage extends StatefulWidget {
+  const ScanPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'pH Scan Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const ScanScreen(),
-    );
-  }
+  State<ScanPage> createState() => _ScanPageState();
 }
 
-class ScanScreen extends StatefulWidget {
-  const ScanScreen({super.key});
-
-  @override
-  State<ScanScreen> createState() => _ScanScreenState();
-}
-
-class _ScanScreenState extends State<ScanScreen> {
-  bool _isProcessing = false;
+class _ScanPageState extends State<ScanPage> {
   CameraController? _controller;
   Future<void>? _initializeControllerFuture;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -46,7 +27,6 @@ class _ScanScreenState extends State<ScanScreen> {
   Future<void> _initCamera() async {
     try {
       final cameras = await availableCameras();
-      if (cameras.isEmpty) return;
       final backCamera = cameras.firstWhere(
         (c) => c.lensDirection == CameraLensDirection.back,
         orElse: () => cameras.first,
@@ -59,11 +39,9 @@ class _ScanScreenState extends State<ScanScreen> {
       _initializeControllerFuture = _controller!.initialize();
       if (mounted) setState(() {});
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Camera init error: $e')));
-      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Camera init error: $e')));
     }
   }
 
@@ -73,6 +51,67 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
+  Future<void> _handleScan() async {
+    if (_controller == null) return;
+    try {
+      setState(() => _isProcessing = true);
+      await _initializeControllerFuture;
+
+      // Capture image
+      final XFile xfile = await _controller!.takePicture();
+      final File imageFile = File(xfile.path);
+
+      // Upload to Firebase Storage
+      final uid = FirebaseAuth.instance.currentUser?.uid ?? "testUser";
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      final storagePath = "users/$uid/scans/$ts.jpg";
+      final ref = FirebaseStorage.instance.ref().child(storagePath);
+      final uploadTask = await ref.putFile(imageFile);
+      final downloadUrl = await uploadTask.ref.getDownloadURL();
+
+      // Static data (for now)
+      const double phValue = 6.2;
+      const String freshness = "Fresh";
+      const int hoursToConsume = 48;
+
+      // Save to Firestore
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(uid)
+          .collection("scans")
+          .doc(ts.toString())
+          .set({
+            "storagePath": storagePath,
+            "imageUrl": downloadUrl,
+            "phValue": phValue,
+            "freshness": freshness,
+            "hoursToConsume": hoursToConsume,
+            "createdAt": FieldValue.serverTimestamp(),
+          });
+
+      if (!mounted) return;
+      setState(() => _isProcessing = false);
+
+      // Navigate to results screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ScanResultsScreen(
+            imageUrl: downloadUrl,
+            phValue: phValue,
+            freshness: freshness,
+            hoursToConsume: hoursToConsume,
+          ),
+        ),
+      );
+    } catch (e) {
+      setState(() => _isProcessing = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,10 +119,6 @@ class _ScanScreenState extends State<ScanScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {},
-        ),
         title: const Text(
           'Scan pH Level',
           style: TextStyle(
@@ -255,332 +290,24 @@ class _ScanScreenState extends State<ScanScreen> {
       },
     );
   }
-
-  Future<void> _handleScan() async {
-    try {
-      if (_initializeControllerFuture == null) return;
-      await _initializeControllerFuture;
-
-      setState(() {
-        _isProcessing = true;
-      });
-
-      // User is already signed in per app flow
-      final uid = FirebaseAuth.instance.currentUser!.uid;
-
-      final XFile xfile = await _controller!.takePicture();
-      final File imageFile = File(xfile.path);
-      final ts = DateTime.now().millisecondsSinceEpoch;
-      final storagePath = 'users/$uid/scans/$ts.jpg';
-      final storageRef = FirebaseStorage.instance.ref().child(storagePath);
-
-      final TaskSnapshot uploadSnap = await storageRef.putFile(imageFile);
-      final downloadUrl = await uploadSnap.ref.getDownloadURL();
-
-      // Simulate analysis
-      await Future.delayed(const Duration(seconds: 2));
-      double phValue = 6.2;
-      String freshness = _calculateFreshness(phValue);
-      int hoursToConsume = _calculateConsumptionTime(phValue);
-
-      // Save scan metadata to Firestore under the user
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('scans')
-          .doc(ts.toString())
-          .set({
-            'imageUrl': downloadUrl,
-            'storagePath': storagePath,
-            'phValue': phValue,
-            'freshness': freshness,
-            'hoursToConsume': hoursToConsume,
-            'createdAt': FieldValue.serverTimestamp(),
-          }, SetOptions(merge: true));
-
-      if (!mounted) return;
-      setState(() {
-        _isProcessing = false;
-      });
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ScanResultsScreen(
-            phValue: phValue,
-            freshness: freshness,
-            hoursToConsume: hoursToConsume,
-            imageUrl: downloadUrl,
-          ),
-        ),
-      );
-
-      if (kDebugMode) {
-        print('✅ Photo uploaded: $downloadUrl');
-      }
-    } on FirebaseException catch (e) {
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Firebase error (${e.code}): ${e.message ?? e}'),
-        ),
-      );
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-      }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error during scan/upload: $e')));
-    }
-  }
-
-  String _calculateFreshness(double ph) {
-    if (ph >= 6.0 && ph <= 7.0) {
-      return 'fresh';
-    } else if (ph >= 5.0 && ph < 6.0) {
-      return 'moderate';
-    } else {
-      return 'spoiled';
-    }
-  }
-
-  int _calculateConsumptionTime(double ph) {
-    if (ph >= 6.0 && ph <= 7.0) {
-      return 48;
-    } else if (ph >= 5.0 && ph < 6.0) {
-      return 24;
-    } else {
-      return 0;
-    }
-  }
 }
 
-class ScanResultsScreen extends StatelessWidget {
-  final double phValue;
-  final String freshness;
-  final int hoursToConsume;
-  final String? imageUrl;
-
-  const ScanResultsScreen({
-    super.key,
-    required this.phValue,
-    required this.freshness,
-    required this.hoursToConsume,
-    this.imageUrl,
-  });
-
-  double _calculateIndicatorPosition() {
-    return (phValue.clamp(0, 14)) / 14.0;
-  }
-
-  Color _getFreshnessColor() {
-    switch (freshness) {
-      case 'fresh':
-        return const Color(0xFF4CAF50);
-      case 'moderate':
-        return const Color(0xFFFF9800);
-      case 'spoiled':
-        return const Color(0xFFF44336);
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Widget _buildPhScaleIndicator(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          height: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFFFF0000),
-                Color(0xFFFF6600),
-                Color(0xFFFFCC00),
-                Color(0xFF66FF00),
-                Color(0xFF00FF66),
-                Color(0xFF0066FF),
-                Color(0xFF6600FF),
-              ],
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                left:
-                    _calculateIndicatorPosition() *
-                        (MediaQuery.of(context).size.width - 80) -
-                    10,
-                top: 5,
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: _getFreshnessColor(), width: 3),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text("0", style: TextStyle(fontSize: 12)),
-            Text("3.5", style: TextStyle(fontSize: 12)),
-            Text("7", style: TextStyle(fontSize: 12)),
-            Text("10.5", style: TextStyle(fontSize: 12)),
-            Text("14", style: TextStyle(fontSize: 12)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: AppBar(
-        title: const Text("Scan Results"),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "pH Value: ${phValue.toStringAsFixed(1)}",
-              style: const TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "Freshness: $freshness",
-              style: TextStyle(
-                fontSize: 20,
-                color: _getFreshnessColor(),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "Consume within: ${hoursToConsume > 0 ? '$hoursToConsume hours' : 'Not safe to consume'}",
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 16),
-            if (imageUrl != null)
-              Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    imageUrl!,
-                    height: 220,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            const SizedBox(height: 30),
-            _buildPhScaleIndicator(context),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF007AFF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "Back to Scan",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
+/// ✅ Custom painter for scan frame border
 class ScanFramePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF007AFF)
-      ..strokeWidth = 3
+      ..color = Colors.white
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 2;
 
-    final cornerLength = size.width * 0.1;
-
-    // Top-left corner
-    canvas.drawLine(Offset.zero, Offset(cornerLength, 0), paint);
-    canvas.drawLine(Offset.zero, Offset(0, cornerLength), paint);
-
-    // Top-right corner
-    canvas.drawLine(
-      Offset(size.width - cornerLength, 0),
-      Offset(size.width, 0),
-      paint,
+    final rect = Rect.fromLTWH(
+      size.width * 0.15,
+      size.height * 0.15,
+      size.width * 0.7,
+      size.height * 0.7,
     );
-    canvas.drawLine(
-      Offset(size.width, 0),
-      Offset(size.width, cornerLength),
-      paint,
-    );
-
-    // Bottom-left corner
-    canvas.drawLine(
-      Offset(0, size.height - cornerLength),
-      Offset(0, size.height),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(0, size.height),
-      Offset(cornerLength, size.height),
-      paint,
-    );
-
-    // Bottom-right corner
-    canvas.drawLine(
-      Offset(size.width - cornerLength, size.height),
-      Offset(size.width, size.height),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(size.width, size.height - cornerLength),
-      Offset(size.width, size.height),
-      paint,
-    );
+    canvas.drawRect(rect, paint);
   }
 
   @override

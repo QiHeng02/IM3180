@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
         '/expiry-notifications': (context) => const ExpiryNotificationsScreen(),
         '/a': (context) => const ChangePasswordScreen(),
         '/history': (context) => const HistoryScreen(),
-        '/scan': (context) => const ScanScreen(),
+        '/scan': (context) => const ScanPage(),
       },
     );
   }
