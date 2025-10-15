@@ -62,7 +62,20 @@ class _ExpiryNotificationsScreenState extends State<ExpiryNotificationsScreen> {
         debugPrint('Failed to update notification settings: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to update settings: $e')),
+            SnackBar(
+              content: Row(
+                children: [
+                  const Text('❌', style: TextStyle(fontSize: 20)),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text('Failed to update settings: $e')),
+                ],
+              ),
+              backgroundColor: const Color(0xFFEF5350),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           );
         }
       }
@@ -71,180 +84,400 @@ class _ExpiryNotificationsScreenState extends State<ExpiryNotificationsScreen> {
     }
   }
 
-  BoxDecoration get _tileDecoration => BoxDecoration(
-    color: const Color(0xFFF7F8FC),
-    borderRadius: BorderRadius.circular(18),
-    border: Border.all(color: const Color(0xFFE6E8EF)),
-  );
-
-  TextStyle get _labelStyle =>
-      const TextStyle(fontSize: 12, color: Color(0xFF7B8190));
-
   @override
   Widget build(BuildContext context) {
     final disabled = !_enabled;
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Expiry Notifications'),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF111827),
-        elevation: 0,
-        automaticallyImplyLeading: true, // Show back arrow
-        actions: const [LogoutButton()],
-      ),
-      body: SafeArea(
-        child: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFFFDF7),
+        appBar: AppBar(
+          title: const Text(
+            'Expiry Notifications',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 20,
+            ),
+          ),
+          centerTitle: true,
+          backgroundColor: const Color(0xFFFFFDF7),
+          foregroundColor: const Color(0xFF2E7D32),
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
+            color: const Color(0xFF2E7D32),
+          ),
+          actions: const [LogoutButton()],
+        ),
+        body: SafeArea(
+          child: _loading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF4CAF50),
+                  ),
+                )
+              : Stack(
                   children: [
-                    const Divider(height: 1),
-                    const SizedBox(height: 20),
-                    // Enable/disable notifications
-                    Container(
-                      decoration: _tileDecoration,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.notifications_outlined,
-                            color: Color(0xFF2F6BFF),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Enable expiry notifications',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF111827),
-                              ),
-                            ),
-                          ),
-                          Switch(
-                            value: _enabled,
-                            onChanged: (val) async {
-                              setState(() => _enabled = val);
-                              await _saveSettings();
-                            },
-                          ),
-                        ],
+                    // Decorative icons
+                    Positioned(
+                      top: 5,
+                      left: 8,
+                      child: Text(
+                        '🔔',
+                        style: TextStyle(fontSize: 28),
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    // Days before expiry
-                    Text('Days before expiry', style: _labelStyle),
-                    Container(
-                      decoration: _tileDecoration,
-                      margin: const EdgeInsets.only(top: 8),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                    
+                    Positioned(
+                      top: 5,
+                      right: 8,
+                      child: Text(
+                        '⏰',
+                        style: TextStyle(fontSize: 28),
                       ),
-                      child: Row(
+                    ),
+                    
+                    // Main content
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _RoundIconButton(
-                            icon: Icons.remove,
-                            onTap: disabled || _daysBefore <= 1
-                                ? null
-                                : () => setState(() => _daysBefore--),
-                          ),
-                          Expanded(
-                            child: Center(
-                              child: Text(
-                                '$_daysBefore days',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF111827),
+                          // Header section with icon
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF66BB6A), Color(0xFF4CAF50)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF4CAF50).withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
                                 ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.notifications_active,
+                                    size: 48,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Stay Fresh!',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Get notified before your food expires',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white.withOpacity(0.9),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Enable notifications toggle
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFFE8F5E9),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF4CAF50).withOpacity(0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF1F8F4),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.notifications_outlined,
+                                    color: Color(0xFF4CAF50),
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                const Expanded(
+                                  child: Text(
+                                    'Enable expiry notifications',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF2E7D32),
+                                    ),
+                                  ),
+                                ),
+                                Switch(
+                                  value: _enabled,
+                                  onChanged: (val) async {
+                                    setState(() => _enabled = val);
+                                    await _saveSettings();
+                                  },
+                                  activeColor: const Color(0xFF4CAF50),
+                                  activeTrackColor: const Color(0xFF66BB6A).withOpacity(0.5),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Days before expiry section
+                          Text(
+                            'Days before expiry',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                            decoration: BoxDecoration(
+                              color: disabled ? Colors.grey[100] : Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: disabled ? Colors.grey[300]! : const Color(0xFFE8F5E9),
+                                width: 1.5,
+                              ),
+                              boxShadow: disabled ? [] : [
+                                BoxShadow(
+                                  color: const Color(0xFF4CAF50).withOpacity(0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Minus button
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: disabled || _daysBefore <= 1
+                                        ? Colors.grey[200]
+                                        : const Color(0xFFF1F8F4),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: disabled || _daysBefore <= 1
+                                          ? Colors.grey[300]!
+                                          : const Color(0xFFE8F5E9),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: disabled || _daysBefore <= 1
+                                        ? null
+                                        : () => setState(() => _daysBefore--),
+                                    icon: const Icon(Icons.remove),
+                                    color: disabled || _daysBefore <= 1
+                                        ? Colors.grey[400]
+                                        : const Color(0xFF4CAF50),
+                                    iconSize: 24,
+                                  ),
+                                ),
+
+                                // Days display
+                                Column(
+                                  children: [
+                                    Text(
+                                      '$_daysBefore',
+                                      style: TextStyle(
+                                        fontSize: 36,
+                                        fontWeight: FontWeight.bold,
+                                        color: disabled ? Colors.grey[400] : const Color(0xFF2E7D32),
+                                      ),
+                                    ),
+                                    Text(
+                                      _daysBefore == 1 ? 'day' : 'days',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: disabled ? Colors.grey[400] : Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                // Plus button
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: disabled || _daysBefore >= 10
+                                        ? Colors.grey[200]
+                                        : const Color(0xFFF1F8F4),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: disabled || _daysBefore >= 10
+                                          ? Colors.grey[300]!
+                                          : const Color(0xFFE8F5E9),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: disabled || _daysBefore >= 10
+                                        ? null
+                                        : () => setState(() => _daysBefore++),
+                                    icon: const Icon(Icons.add),
+                                    color: disabled || _daysBefore >= 10
+                                        ? Colors.grey[400]
+                                        : const Color(0xFF4CAF50),
+                                    iconSize: 24,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Info hint
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F8F4),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFE8F5E9),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Text('💡', style: TextStyle(fontSize: 16)),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    disabled
+                                        ? 'Enable notifications to receive alerts'
+                                        : 'You\'ll receive a notification $_daysBefore ${_daysBefore == 1 ? 'day' : 'days'} before your food expires',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Save button
+                          Container(
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: disabled
+                                  ? null
+                                  : const LinearGradient(
+                                      colors: [Color(0xFF66BB6A), Color(0xFF4CAF50)],
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                    ),
+                              color: disabled ? Colors.grey[300] : null,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: disabled ? [] : [
+                                BoxShadow(
+                                  color: const Color(0xFF4CAF50).withOpacity(0.4),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                elevation: 0,
+                                disabledBackgroundColor: Colors.transparent,
+                                disabledForegroundColor: Colors.white70,
+                              ),
+                              onPressed: disabled
+                                  ? null
+                                  : () async {
+                                      await _saveSettings();
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: const Row(
+                                            children: [
+                                              Text('✅', style: TextStyle(fontSize: 20)),
+                                              SizedBox(width: 12),
+                                              Text('Settings saved successfully!'),
+                                            ],
+                                          ),
+                                          backgroundColor: const Color(0xFF4CAF50),
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Save Changes',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                      color: disabled ? Colors.white70 : Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    Icons.check_circle,
+                                    size: 20,
+                                    color: disabled ? Colors.white70 : Colors.white,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          _RoundIconButton(
-                            icon: Icons.add,
-                            onTap: disabled || _daysBefore >= 10
-                                ? null
-                                : () => setState(() => _daysBefore++),
-                          ),
                         ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    const SizedBox(height: 32),
-                    // Save button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: disabled
-                            ? null
-                            : () async {
-                                await _saveSettings();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Settings saved!'),
-                                  ),
-                                );
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2F6BFF),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Save',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-      ),
-      bottomNavigationBar: const AppBottomNavBar(currentIndex: 3),
-    );
-  }
-}
-
-class _RoundIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onTap;
-
-  const _RoundIconButton({required this.icon, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Container(
-          width: 40,
-          height: 40,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFE6E8EF)),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon),
         ),
+        bottomNavigationBar: const AppBottomNavBar(currentIndex: 3),
       ),
     );
   }

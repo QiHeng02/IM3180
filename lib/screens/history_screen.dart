@@ -8,131 +8,198 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFFFDF7),
       appBar: AppBar(
         title: const Text(
           'History',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF111827),
+        backgroundColor: const Color(0xFFFFFDF7),
+        foregroundColor: const Color(0xFF2E7D32),
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: const [LogoutButton()],
       ),
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            const Divider(height: 1),
-
-            // List of history items
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildHistoryItem(
-                    title: 'Apple',
-                    description: 'PH 5.3 - Fresh to eat. Consume in 14 days!',
-                  ),
-                  _buildHistoryItem(
-                    title: 'Banana',
-                    description: 'PH 15.0 - Fresh to eat. Consume in 100 days!',
-                  ),
-                  _buildHistoryItem(
-                    title: 'List item',
-                    description:
-                        'Supporting line text lorem ipsum dolor sit amet, consectetur.',
-                  ),
-                  _buildHistoryItem(
-                    title: 'List item',
-                    description:
-                        'Supporting line text lorem ipsum dolor sit amet, consectetur.',
-                  ),
-                  _buildHistoryItem(
-                    title: 'List item',
-                    description:
-                        'Supporting line text lorem ipsum dolor sit amet, consectetur.',
-                  ),
-                ],
+            // Decorative food icons
+            Positioned(
+              top: 5,
+              left: 8,
+              child: Text(
+                '🍃',
+                style: TextStyle(fontSize: 28),
               ),
+            ),
+            
+            Positioned(
+              top: 5,
+              right: 8,
+              child: Text(
+                '🥗',
+                style: TextStyle(fontSize: 28),
+              ),
+            ),
+            
+            // Main content
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Divider(height: 1, color: Color(0xFFE8F5E9)),
+                
+                // Title section
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF66BB6A), Color(0xFF4CAF50)],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.history,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Food History',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2E7D32),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // List of history items
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: [
+                      _buildHistoryItem(
+                        emoji: '🍎',
+                        title: 'Organic Apples',
+                        status: 'Fresh',
+                        description: 'Fresh to eat. Consume in 14 days!',
+                        statusColor: const Color(0xFF4CAF50),
+                      ),
+                      _buildHistoryItem(
+                        emoji: '🍌',
+                        title: 'Ripe Bananas',
+                        status: 'Expiring Soon',
+                        description: 'Fresh to eat. Consume in 3 days!',
+                        statusColor: const Color(0xFFFFA726),
+                      ),
+                      _buildHistoryItem(
+                        emoji: '🥕',
+                        title: 'Baby Carrots',
+                        status: 'Expired',
+                        description: 'Expired 2 days ago.',
+                        statusColor: const Color(0xFFEF5350),
+                      ),
+                      _buildHistoryItem(
+                        emoji: '🥛',
+                        title: 'Whole Milk',
+                        status: 'Fresh',
+                        description: 'Fresh to eat. Consume in 7 days!',
+                        statusColor: const Color(0xFF4CAF50),
+                      ),
+                      _buildHistoryItem(
+                        emoji: '🧀',
+                        title: 'Cheddar Cheese',
+                        status: 'Expiring Soon',
+                        description: 'Fresh to eat. Consume in 5 days!',
+                        statusColor: const Color(0xFFFFA726),
+                      ),
+                      _buildHistoryItem(
+                        emoji: '🥚',
+                        title: 'Farm Fresh Eggs',
+                        status: 'Fresh',
+                        description: 'Fresh to eat. Consume in 10 days!',
+                        statusColor: const Color(0xFF4CAF50),
+                      ),
+                      _buildHistoryItem(
+                        emoji: '🍊',
+                        title: 'Orange Juice',
+                        status: 'Fresh',
+                        description: 'Fresh to eat. Consume in 21 days!',
+                        statusColor: const Color(0xFF4CAF50),
+                      ),
+                      _buildHistoryItem(
+                        emoji: '🍌',
+                        title: 'Green Bananas',
+                        status: 'Fresh',
+                        description: 'Fresh to eat. Consume in 8 days!',
+                        statusColor: const Color(0xFF4CAF50),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
-
       bottomNavigationBar: AppBottomNavBar(currentIndex: 1),
     );
   }
 
   Widget _buildHistoryItem({
+    required String emoji,
     required String title,
+    required String status,
     required String description,
+    required Color statusColor,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE0E0E0), width: 1)),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFE8F5E9),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4CAF50).withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          // Purple icon container with abstract shapes
+          // Emoji icon container
           Container(
-            width: 40,
-            height: 40,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: const Color(0xFF2F6BFF), // Blue color
-              borderRadius: BorderRadius.circular(8),
+              color: statusColor.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: statusColor.withOpacity(0.3),
+                width: 1.5,
+              ),
             ),
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              child: Text(
+                emoji,
+                style: const TextStyle(fontSize: 24),
               ),
             ),
           ),
@@ -149,27 +216,62 @@ class HistoryScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Color(0xFF2E7D32),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        status,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: statusColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
                 Text(
                   description,
-                  style: const TextStyle(fontSize: 14, color: Colors.black),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                    height: 1.3,
+                  ),
                 ),
               ],
             ),
           ),
 
           // Delete button
-          IconButton(
-            onPressed: () {
-              // Handle delete action
-            },
-            icon: const Icon(
-              Icons.delete_outline,
-              color: Colors.black,
-              size: 20,
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFEBEE),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              onPressed: () {
+                // Handle delete action
+              },
+              icon: const Icon(
+                Icons.delete_outline,
+                color: Color(0xFFEF5350),
+                size: 22,
+              ),
+              padding: const EdgeInsets.all(8),
+              constraints: const BoxConstraints(),
             ),
           ),
         ],
