@@ -158,7 +158,7 @@ class ScanResultsScreen extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue, // blue background
+                  backgroundColor: Color(0xFF007AFF), // blue background
                   foregroundColor: Colors.white, // white text
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

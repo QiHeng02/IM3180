@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Tutorial1Screen extends StatelessWidget {
   const Tutorial1Screen({super.key});
+
+  Future<void> _completeOnboarding(BuildContext context) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'onboardingDone': true,
+      }, SetOptions(merge: true));
+    }
+    Navigator.pushReplacementNamed(context, '/home');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,9 +110,7 @@ class Tutorial1Screen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
+                      onPressed: () => _completeOnboarding(context),
                       child: const Text('Skip', style: TextStyle(fontSize: 16)),
                     ),
                   ),

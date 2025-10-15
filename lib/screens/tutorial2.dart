@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Tutorial2Screen extends StatelessWidget {
   const Tutorial2Screen({super.key});
+
+  Future<void> _completeOnboarding(BuildContext context) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'onboardingDone': true,
+      }, SetOptions(merge: true));
+    }
+    Navigator.pushReplacementNamed(context, '/home');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +88,8 @@ class Tutorial2Screen extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
+                  // Continue → mark done, then go Home
+                  onPressed: () => _completeOnboarding(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A7CFF),
                     foregroundColor: Colors.white,
@@ -84,9 +98,6 @@ class Tutorial2Screen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/home');
-                  },
                   child: const Text(
                     'Continue to app',
                     style: TextStyle(fontSize: 16),

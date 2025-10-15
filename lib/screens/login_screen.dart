@@ -23,6 +23,28 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _navigateAfterAuth(User user) async {
+    final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final snap = await docRef.get();
+
+    if (!snap.exists) {
+      // First login: create doc and send to tutorial
+      await docRef.set({
+        'email': user.email,
+        'name': '',
+        'phone': '',
+        'onboardingDone': false,
+      }, SetOptions(merge: true));
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/tutorial1');
+      return;
+    }
+
+    final done = snap.data()?['onboardingDone'] == true;
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, done ? '/home' : '/tutorial1');
+  }
+
   void login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -32,26 +54,10 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      debugPrint('Login successful for email: $email');
 
-      // Create Firestore user doc if not exists
       final user = userCredential.user;
       if (user != null) {
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        if (!userDoc.exists) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .set({'email': user.email, 'name': '', 'phone': ''});
-        }
-      }
-
-      // Navigate to HomeScreen
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/tutorial1');
+        await _navigateAfterAuth(user);
       }
     } on FirebaseAuthException catch (e) {
       String message = e.message ?? 'Login failed';
@@ -84,23 +90,10 @@ class _LoginScreenState extends State<LoginScreen> {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithCredential(credential);
 
-      // Create Firestore user doc if not exists
       final user = userCredential.user;
       if (user != null) {
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        if (!userDoc.exists) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .set({'email': user.email, 'name': '', 'phone': ''});
-        }
+        await _navigateAfterAuth(user);
       }
-
-      // Navigate to Tutorial1Screen
-      Navigator.pushReplacementNamed(context, '/tutorial1');
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -116,23 +109,18 @@ class _LoginScreenState extends State<LoginScreen> {
             password: _passwordController.text.trim(),
           );
 
-      // Create Firestore user doc if not exists
       final user = userCredential.user;
       if (user != null) {
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        if (!userDoc.exists) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .set({'email': user.email, 'name': '', 'phone': ''});
-        }
+        // New user: mark onboarding not done, then go to tutorial
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': user.email,
+          'name': '',
+          'phone': '',
+          'onboardingDone': false,
+        }, SetOptions(merge: true));
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/tutorial1');
       }
-
-      // After signup, navigate to HomeScreen
-      Navigator.pushReplacementNamed(context, '/tutorial1');
     } on FirebaseAuthException catch (e) {
       String message = e.message ?? 'Signup failed';
       ScaffoldMessenger.of(

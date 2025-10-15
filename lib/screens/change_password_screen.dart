@@ -34,33 +34,34 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     borderSide: const BorderSide(color: Color(0xFFE8F5E9), width: 1.5),
   );
 
-  InputDecoration _decoration(String label, String hint, IconData icon) => InputDecoration(
-    labelText: label,
-    hintText: hint,
-    prefixIcon: Icon(icon, color: const Color(0xFF66BB6A), size: 22),
-    labelStyle: const TextStyle(
-      fontSize: 14, 
-      color: Color(0xFF4CAF50),
-      fontWeight: FontWeight.w500,
-    ),
-    hintStyle: const TextStyle(
-      fontSize: 13,
-      color: Color(0xFFB0BEC5),
-    ),
-    filled: true,
-    fillColor: const Color(0xFFF1F8F4),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    enabledBorder: _fieldBorder,
-    focusedBorder: _fieldBorder.copyWith(
-      borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
-    ),
-    errorBorder: _fieldBorder.copyWith(
-      borderSide: const BorderSide(color: Color(0xFFEF5350), width: 1.5),
-    ),
-    focusedErrorBorder: _fieldBorder.copyWith(
-      borderSide: const BorderSide(color: Color(0xFFEF5350), width: 2),
-    ),
-  );
+  InputDecoration _decoration(String label, String hint, IconData icon) =>
+      InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon, color: const Color(0xFF66BB6A), size: 22),
+        labelStyle: const TextStyle(
+          fontSize: 14,
+          color: Color(0xFF4CAF50),
+          fontWeight: FontWeight.w500,
+        ),
+        hintStyle: const TextStyle(fontSize: 13, color: Color(0xFFB0BEC5)),
+        filled: true,
+        fillColor: const Color(0xFFF1F8F4),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        enabledBorder: _fieldBorder,
+        focusedBorder: _fieldBorder.copyWith(
+          borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+        ),
+        errorBorder: _fieldBorder.copyWith(
+          borderSide: const BorderSide(color: Color(0xFFEF5350), width: 1.5),
+        ),
+        focusedErrorBorder: _fieldBorder.copyWith(
+          borderSide: const BorderSide(color: Color(0xFFEF5350), width: 2),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -72,10 +73,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         appBar: AppBar(
           title: const Text(
             'Change Password',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
           ),
           centerTitle: true,
           backgroundColor: const Color(0xFFFFFDF7),
@@ -95,40 +93,28 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               Positioned(
                 top: 5,
                 left: 0,
-                child: Text(
-                  '🍃',
-                  style: TextStyle(fontSize: 28),
-                ),
+                child: Text('🍃', style: TextStyle(fontSize: 28)),
               ),
-              
+
               Positioned(
                 top: 5,
                 right: 0,
-                child: Text(
-                  '🍊',
-                  style: TextStyle(fontSize: 28),
-                ),
+                child: Text('🍊', style: TextStyle(fontSize: 28)),
               ),
-              
+
               // Bottom corners - above nav bar
               Positioned(
                 bottom: 300,
                 left: 8,
-                child: Text(
-                  '🥕',
-                  style: TextStyle(fontSize: 28),
-                ),
+                child: Text('🥕', style: TextStyle(fontSize: 28)),
               ),
-              
+
               Positioned(
                 bottom: 300,
                 right: 4,
-                child: Text(
-                  '🍉',
-                  style: TextStyle(fontSize: 28),
-                ),
+                child: Text('🍉', style: TextStyle(fontSize: 28)),
               ),
-              
+
               // Main content
               SingleChildScrollView(
                 padding: EdgeInsets.only(
@@ -268,8 +254,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               Icons.check_circle_outline,
                             ).copyWith(
                               suffixIcon: IconButton(
-                                onPressed: () =>
-                                    setState(() => _hideConfirm = !_hideConfirm),
+                                onPressed: () => setState(
+                                  () => _hideConfirm = !_hideConfirm,
+                                ),
                                 icon: Icon(
                                   _hideConfirm
                                       ? Icons.visibility_off_outlined
@@ -278,8 +265,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 ),
                               ),
                             ),
-                        validator: (v) =>
-                            v != _newCtrl.text ? 'Passwords do not match' : null,
+                        validator: (v) => v != _newCtrl.text
+                            ? 'Passwords do not match'
+                            : null,
                       ),
                       const SizedBox(height: 12),
 
@@ -351,7 +339,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 );
 
                                 // Re-authenticate
-                                await user.reauthenticateWithCredential(credential);
+                                await user.reauthenticateWithCredential(
+                                  credential,
+                                );
 
                                 // Update password
                                 await user.updatePassword(_newCtrl.text);
@@ -360,7 +350,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   SnackBar(
                                     content: const Row(
                                       children: [
-                                        Text('✅', style: TextStyle(fontSize: 20)),
+                                        Text(
+                                          '✅',
+                                          style: TextStyle(fontSize: 20),
+                                        ),
                                         SizedBox(width: 12),
                                         Text('Password updated successfully!'),
                                       ],
@@ -383,11 +376,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   SnackBar(
                                     content: Row(
                                       children: [
-                                        const Text('❌', style: TextStyle(fontSize: 20)),
+                                        const Text(
+                                          '❌',
+                                          style: TextStyle(fontSize: 20),
+                                        ),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Text(
-                                            e.message ?? 'Failed to update password',
+                                            e.message ??
+                                                'Failed to update password',
                                           ),
                                         ),
                                       ],
