@@ -119,6 +119,7 @@ class _ScanPageState extends State<ScanPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false, // removes the back arrow
         title: const Text(
           'Scan pH Level',
           style: TextStyle(

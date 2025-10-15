@@ -34,50 +34,36 @@ class Tutorial2Screen extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    height: 160,
+                    height: 200,
                     width: double.infinity,
+                    clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.image,
-                      size: 64,
-                      color: Colors.grey,
+                    child: Image.asset(
+                      'assets/Tutorial step 2.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(
+                            child: Icon(
+                              Icons.image_not_supported,
+                              size: 64,
+                              color: Colors.grey,
+                            ),
+                          ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade400,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 24),
                   const Text(
-                    'Step 2: ?',
+                    'Step 2: Results',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    "<XXXXX>",
+                    "pH value, freshness level and hours to be consumed by will be shown.",
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                     textAlign: TextAlign.center,
                   ),
