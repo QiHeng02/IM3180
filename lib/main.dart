@@ -7,6 +7,11 @@ import 'screens/tutorial2.dart';
 import 'screens/home.dart';
 import 'screens/register_screen.dart';
 import 'screens/change_password_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/edit_profile_screen.dart';
+import 'screens/expiry_notifications_screen.dart';
+import 'screens/history_screen.dart';
+import 'screens/scan.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +37,12 @@ class MyApp extends StatelessWidget {
         '/tutorial1': (context) => const Tutorial1Screen(),
         '/tutorial2': (context) => const Tutorial2Screen(),
         '/home': (context) => const HomeScreen(),
+        '/settings': (context) => const SettingsScreen(),
+        '/edit-profile': (context) => const EditProfileScreen(),
+        '/expiry-notifications': (context) => const ExpiryNotificationsScreen(),
         '/a': (context) => const ChangePasswordScreen(),
+        '/history': (context) => const HistoryScreen(),
+        '/scan': (context) => const ScanPage(),
       },
     );
   }

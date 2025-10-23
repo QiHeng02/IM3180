@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
-import 'tutorial2.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Tutorial1Screen extends StatelessWidget {
   const Tutorial1Screen({super.key});
+
+  Future<void> _completeOnboarding(BuildContext context) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'onboardingDone': true,
+      }, SetOptions(merge: true));
+    }
+    Navigator.pushReplacementNamed(context, '/home');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,30 +46,23 @@ class Tutorial1Screen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Image.asset(...) // Ignore image for now
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade400,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ],
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'assets/Tutorial step 1.png',
+                      height: 220,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(
+                            child: Icon(
+                              Icons.image_not_supported,
+                              size: 64,
+                              color: Colors.grey,
+                            ),
+                          ),
+                    ),
                   ),
+                  const SizedBox(height: 16),
                   const SizedBox(height: 24),
                   const Text(
                     'Step 1: Take a Picture',
@@ -106,9 +110,7 @@ class Tutorial1Screen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
+                      onPressed: () => _completeOnboarding(context),
                       child: const Text('Skip', style: TextStyle(fontSize: 16)),
                     ),
                   ),
