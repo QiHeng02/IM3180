@@ -1,0 +1,9 @@
+firebase-functions
+firebase-admin
+functions-framework
+joblib
+numpy
+pillow
+requests
+scikit-learn
+opencv-python-headless==4.10.0.84

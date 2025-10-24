@@ -42,7 +42,15 @@ class MyApp extends StatelessWidget {
         '/expiry-notifications': (context) => const ExpiryNotificationsScreen(),
         '/a': (context) => const ChangePasswordScreen(),
         '/history': (context) => const HistoryScreen(),
-        '/scan': (context) => const ScanPage(),
+        '/scan': (context) {
+          final args =
+              ModalRoute.of(context)?.settings.arguments
+                  as Map<String, String?>?;
+          return ScanPage(
+            selectedCategory: args?['selectedCategory'],
+            selectedFood: args?['selectedFood'],
+          );
+        },
       },
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:im3180/widgets/bottom_nav.dart';
+import 'package:im3180/screens/scan.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -305,39 +306,23 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (selectedCategory == null || selectedFood == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                          'Please select both category and food item.',
-                        ),
+                        content: Text('Please select both category and food.'),
                       ),
                     );
                     return;
                   }
-                  final user = FirebaseAuth.instance.currentUser;
-                  if (user == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Not logged in!')),
-                    );
-                    return;
-                  }
-                  // Store selection in users collection
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(user.uid)
-                      .set({
-                        'selectedCategory': selectedCategory,
-                        'selectedFood': selectedFood,
-                      }, SetOptions(merge: true));
-                  debugPrint(
-                    'Stored for user ${user.uid}: category=${selectedCategory ?? "None"}, food=${selectedFood ?? "None"}',
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Saved! Category: ${selectedCategory ?? "None"}, Food: ${selectedFood ?? "None"}',
+
+                  // Navigate and pass selections to ScanPage
+                  if (!context.mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ScanPage(
+                        selectedCategory: selectedCategory!,
+                        selectedFood: selectedFood!,
                       ),
                     ),
                   );
-                  Navigator.pushReplacementNamed(context, '/scan');
                 },
                 child: const Text(
                   'Submit',

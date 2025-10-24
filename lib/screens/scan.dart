@@ -6,8 +6,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'scan_results.dart';
 
+// Accept selections from Home (optional so existing routes still work)
 class ScanPage extends StatefulWidget {
-  const ScanPage({super.key});
+  const ScanPage({super.key, this.selectedCategory, this.selectedFood});
+
+  final String? selectedCategory;
+  final String? selectedFood;
 
   @override
   State<ScanPage> createState() => _ScanPageState();
@@ -52,63 +56,87 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> _handleScan() async {
-    if (_controller == null) return;
+    if (_controller == null || _isProcessing) return;
+
     try {
       setState(() => _isProcessing = true);
       await _initializeControllerFuture;
 
-      // Capture image
-      final XFile xfile = await _controller!.takePicture();
-      final File imageFile = File(xfile.path);
+      // 1) Capture image
+      final xfile = await _controller!.takePicture();
+      final file = File(xfile.path);
 
-      // Upload to Firebase Storage
-      final uid = FirebaseAuth.instance.currentUser?.uid ?? "testUser";
-      final ts = DateTime.now().millisecondsSinceEpoch;
+      // 2) Upload to Storage
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('Not signed in');
+      final uid = user.uid;
+      final ts = DateTime.now().millisecondsSinceEpoch.toString();
       final storagePath = "users/$uid/scans/$ts.jpg";
       final ref = FirebaseStorage.instance.ref().child(storagePath);
-      final uploadTask = await ref.putFile(imageFile);
-      final downloadUrl = await uploadTask.ref.getDownloadURL();
+      await ref.putFile(file);
+      final downloadUrl = await ref.getDownloadURL();
 
-      // Static data (for now)
-      const double phValue = 6.2;
-      const String freshness = "Fresh";
-      const int hoursToConsume = 48;
+      // 3) Use selections passed in (fallbacks are empty)
+      final selCategory = (widget.selectedCategory ?? '').trim();
+      final selFood = (widget.selectedFood ?? '').trim();
 
-      // Save to Firestore
-      await FirebaseFirestore.instance
-          .collection("users")
+      // 4) Create pending scan doc to trigger Cloud Function (main.py)
+      final scanRef = FirebaseFirestore.instance
+          .collection('users')
           .doc(uid)
-          .collection("scans")
-          .doc(ts.toString())
-          .set({
-            "storagePath": storagePath,
-            "imageUrl": downloadUrl,
-            "phValue": phValue,
-            "freshness": freshness,
-            "hoursToConsume": hoursToConsume,
-            "createdAt": FieldValue.serverTimestamp(),
-          });
+          .collection('scans')
+          .doc(ts);
+
+      await scanRef.set({
+        'status': 'pending',
+        'storagePath': storagePath,
+        'imageUrl': downloadUrl,
+        'selectedCategory': selCategory,
+        'selectedFood': selFood,
+        // optional duplicates for compatibility
+        'category': selCategory,
+        'food': selFood,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      // 5) Wait for function to finish (status != 'pending')
+      final snap = await scanRef.snapshots().firstWhere(
+        (s) => (s.data()?['status'] ?? 'pending') != 'pending',
+      );
 
       if (!mounted) return;
       setState(() => _isProcessing = false);
 
-      // Navigate to results screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ScanResultsScreen(
-            imageUrl: downloadUrl,
-            phValue: phValue,
-            freshness: freshness,
-            hoursToConsume: hoursToConsume,
+      final data = snap.data() ?? {};
+      if ((data['status'] as String?) == 'complete') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ScanResultsScreen(
+              imageUrl: downloadUrl,
+              phValue: (data['phValue'] ?? 0).toDouble(),
+              freshness: (data['freshness'] ?? 'unknown').toString(),
+              hoursToConsume: (data['hoursToConsume'] ?? 0) as int,
+              safePhMin: (data['safePhMin'] as num?)?.toDouble(),
+              safePhMax: (data['safePhMax'] as num?)?.toDouble(),
+              selectedFood: (data['selectedFood'] ?? '') as String?,
+              isInSafeRange: data['isInSafeRange'] as bool?,
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        final msg = (data['errorMessage'] ?? 'Analysis failed').toString();
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
+      }
     } catch (e) {
-      setState(() => _isProcessing = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     }
   }
 

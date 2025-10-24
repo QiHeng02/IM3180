@@ -1,21 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:im3180/widgets/bottom_nav.dart';
 import 'home.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
 
+  Color _statusColor(String freshness) {
+    switch (freshness.toLowerCase()) {
+      case 'fresh':
+        return const Color(0xFF4CAF50);
+      case 'moderate':
+        return const Color(0xFFFFA726);
+      case 'spoiled':
+        return const Color(0xFFEF5350);
+      default:
+        return const Color(0xFF90A4AE);
+    }
+  }
+
+  String _emojiForFood(String? food) {
+    final f = (food ?? '').toLowerCase();
+    if (f.contains('apple')) return '🍎';
+    if (f.contains('blueberry')) return '🫐';
+    if (f.contains('chicken')) return '🍗';
+    if (f.contains('tofu')) return '🥡';
+    if (f.contains('banana')) return '🍌';
+    if (f.contains('milk')) return '🥛';
+    return '🍽️';
+  }
+
+  String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: const Color(0xFFFFFDF7),
       appBar: AppBar(
         title: const Text(
           'History',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFFFFFDF7),
@@ -25,144 +51,167 @@ class HistoryScreen extends StatelessWidget {
         actions: const [LogoutButton()],
       ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            // Decorative food icons
-            Positioned(
-              top: 5,
-              left: 8,
-              child: Text(
-                '🍃',
-                style: TextStyle(fontSize: 28),
-              ),
-            ),
-            
-            Positioned(
-              top: 5,
-              right: 8,
-              child: Text(
-                '🥗',
-                style: TextStyle(fontSize: 28),
-              ),
-            ),
-            
-            // Main content
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Divider(height: 1, color: Color(0xFFE8F5E9)),
-                
-                // Title section
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF66BB6A), Color(0xFF4CAF50)],
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.history,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Food History',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2E7D32),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+        child: user == null
+            ? const Center(child: Text('Please sign in to view history'))
+            : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection('scans')
+                    .where('status', isEqualTo: 'complete')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+                  final docs = (snapshot.data?.docs ?? [])
+                    ..sort((a, b) {
+                      final ta =
+                          (a.data()['inferredAt'] ?? a.data()['createdAt']);
+                      final tb =
+                          (b.data()['inferredAt'] ?? b.data()['createdAt']);
+                      if (ta == null || tb == null) return 0;
+                      return (tb as Timestamp).compareTo(
+                        ta as Timestamp,
+                      ); // latest first
+                    });
+                  if (docs.isEmpty) {
+                    return const Center(child: Text('No scans yet.'));
+                  }
 
-                // List of history items
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  return Stack(
                     children: [
-                      _buildHistoryItem(
-                        emoji: '🍎',
-                        title: 'Organic Apples',
-                        status: 'Fresh',
-                        description: 'Fresh to eat. Consume in 14 days!',
-                        statusColor: const Color(0xFF4CAF50),
+                      // Decorative food icons (kept)
+                      const Positioned(
+                        top: 5,
+                        left: 8,
+                        child: Text('🍃', style: TextStyle(fontSize: 28)),
                       ),
-                      _buildHistoryItem(
-                        emoji: '🍌',
-                        title: 'Ripe Bananas',
-                        status: 'Expiring Soon',
-                        description: 'Fresh to eat. Consume in 3 days!',
-                        statusColor: const Color(0xFFFFA726),
+                      const Positioned(
+                        top: 5,
+                        right: 8,
+                        child: Text('🥗', style: TextStyle(fontSize: 28)),
                       ),
-                      _buildHistoryItem(
-                        emoji: '🥕',
-                        title: 'Baby Carrots',
-                        status: 'Expired',
-                        description: 'Expired 2 days ago.',
-                        statusColor: const Color(0xFFEF5350),
-                      ),
-                      _buildHistoryItem(
-                        emoji: '🥛',
-                        title: 'Whole Milk',
-                        status: 'Fresh',
-                        description: 'Fresh to eat. Consume in 7 days!',
-                        statusColor: const Color(0xFF4CAF50),
-                      ),
-                      _buildHistoryItem(
-                        emoji: '🧀',
-                        title: 'Cheddar Cheese',
-                        status: 'Expiring Soon',
-                        description: 'Fresh to eat. Consume in 5 days!',
-                        statusColor: const Color(0xFFFFA726),
-                      ),
-                      _buildHistoryItem(
-                        emoji: '🥚',
-                        title: 'Farm Fresh Eggs',
-                        status: 'Fresh',
-                        description: 'Fresh to eat. Consume in 10 days!',
-                        statusColor: const Color(0xFF4CAF50),
-                      ),
-                      _buildHistoryItem(
-                        emoji: '🍊',
-                        title: 'Orange Juice',
-                        status: 'Fresh',
-                        description: 'Fresh to eat. Consume in 21 days!',
-                        statusColor: const Color(0xFF4CAF50),
-                      ),
-                      _buildHistoryItem(
-                        emoji: '🍌',
-                        title: 'Green Bananas',
-                        status: 'Fresh',
-                        description: 'Fresh to eat. Consume in 8 days!',
-                        statusColor: const Color(0xFF4CAF50),
+
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Divider(height: 1, color: Color(0xFFE8F5E9)),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF66BB6A),
+                                        Color(0xFF4CAF50),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.history,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'Food History',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2E7D32),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Real items
+                          Expanded(
+                            child: ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              itemCount: docs.length,
+                              itemBuilder: (context, index) {
+                                final doc = docs[index];
+                                final data = doc.data();
+                                final food =
+                                    (data['selectedFood'] ?? data['food'] ?? '')
+                                        as String;
+                                final category =
+                                    (data['selectedCategory'] ??
+                                            data['category'] ??
+                                            '')
+                                        as String;
+                                final ph = (data['phValue'] as num?)
+                                    ?.toDouble();
+                                final freshness =
+                                    (data['freshness'] ?? 'unknown').toString();
+                                final hours = data['hoursToConsume'];
+                                final imageUrl = data['imageUrl'] as String?;
+                                final storagePath =
+                                    data['storagePath'] as String?;
+                                final inferredAt =
+                                    data['inferredAt']; // Timestamp?
+                                final title = food.isNotEmpty
+                                    ? _cap(food)
+                                    : (category.isNotEmpty
+                                          ? _cap(category)
+                                          : 'Scan');
+                                final statusColor = _statusColor(freshness);
+
+                                final descParts = <String>[];
+                                if (ph != null)
+                                  descParts.add('pH ${ph.toStringAsFixed(1)}');
+                                descParts.add(_cap(freshness));
+                                if (hours is int) {
+                                  descParts.add(
+                                    hours > 0
+                                        ? 'Consume in $hours h'
+                                        : 'Not safe to consume',
+                                  );
+                                }
+                                final description = descParts.join(' • ');
+
+                                return _buildHistoryItem(
+                                  emoji: _emojiForFood(food),
+                                  title: title,
+                                  status: _cap(freshness),
+                                  description: description,
+                                  statusColor: statusColor,
+                                  imageUrl: imageUrl,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+                  );
+                },
+              ),
       ),
       bottomNavigationBar: AppBottomNavBar(currentIndex: 1),
     );
   }
 
+  // Removed onDelete
   Widget _buildHistoryItem({
     required String emoji,
     required String title,
     required String status,
     required String description,
     required Color statusColor,
+    String? imageUrl,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -170,10 +219,7 @@ class HistoryScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFE8F5E9),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFE8F5E9), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF4CAF50).withOpacity(0.08),
@@ -184,7 +230,7 @@ class HistoryScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Emoji icon container
+          // Left: emoji or thumbnail
           Container(
             width: 48,
             height: 48,
@@ -196,11 +242,22 @@ class HistoryScreen extends StatelessWidget {
                 width: 1.5,
               ),
             ),
-            child: Center(
-              child: Text(
-                emoji,
-                style: const TextStyle(fontSize: 24),
-              ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: imageUrl == null || imageUrl.isEmpty
+                  ? Center(
+                      child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                    )
+                  : Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Center(
+                        child: Text(
+                          emoji,
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                      ),
+                    ),
             ),
           ),
 
@@ -213,6 +270,8 @@ class HistoryScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -254,26 +313,7 @@ class HistoryScreen extends StatelessWidget {
               ],
             ),
           ),
-
-          // Delete button
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFEBEE),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: IconButton(
-              onPressed: () {
-                // Handle delete action
-              },
-              icon: const Icon(
-                Icons.delete_outline,
-                color: Color(0xFFEF5350),
-                size: 22,
-              ),
-              padding: const EdgeInsets.all(8),
-              constraints: const BoxConstraints(),
-            ),
-          ),
+          // trailing space preserved; delete button removed
         ],
       ),
     );

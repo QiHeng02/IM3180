@@ -7,12 +7,22 @@ class ScanResultsScreen extends StatelessWidget {
   final String freshness;
   final int hoursToConsume;
 
+  // NEW optional fields from function
+  final double? safePhMin;
+  final double? safePhMax;
+  final String? selectedFood;
+  final bool? isInSafeRange;
+
   const ScanResultsScreen({
     super.key,
     required this.imageUrl,
     required this.phValue,
     required this.freshness,
     required this.hoursToConsume,
+    this.safePhMin,
+    this.safePhMax,
+    this.selectedFood,
+    this.isInSafeRange,
   });
 
   Color _getFreshnessColor() {
@@ -149,6 +159,16 @@ class ScanResultsScreen extends StatelessWidget {
               'Consume within: ${hoursToConsume > 0 ? '$hoursToConsume hours' : 'Not safe to consume'}',
               style: const TextStyle(fontSize: 18),
             ),
+            const SizedBox(height: 10),
+            if (safePhMin != null && safePhMax != null) ...[
+              Text(
+                'Safe pH for ${selectedFood?.isNotEmpty == true ? selectedFood : "item"}: '
+                '${safePhMin!.toStringAsFixed(1)} - ${safePhMax!.toStringAsFixed(1)}'
+                '${isInSafeRange == null ? "" : (isInSafeRange! ? " (in range)" : " (out of range)")}',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 10),
+            ],
             const SizedBox(height: 30),
             _phScaleIndicator(context),
             const Spacer(),
