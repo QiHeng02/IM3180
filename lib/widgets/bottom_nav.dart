@@ -33,7 +33,7 @@ class AppBottomNavBar extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-        BottomNavigationBarItem(icon: Icon(Icons.check_box), label: 'Tutorial'),
+        BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Tutorial'),
         BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
       ],
       onTap: (index) => _onItemTapped(context, index),

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Tutorial2Screen extends StatelessWidget {
-  const Tutorial2Screen({super.key});
+class Tutorial4Screen extends StatelessWidget {
+  const Tutorial4Screen({super.key});
 
   Future<void> _completeOnboarding(BuildContext context) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -53,8 +53,8 @@ class Tutorial2Screen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Image.asset(
-                      'assets/Step2.png',
-                      height: 290,
+                      'assets/Step4.png',
+                      height: 330,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) =>
                           const Center(
@@ -69,13 +69,13 @@ class Tutorial2Screen extends StatelessWidget {
                   const SizedBox(height: 16),
                   const SizedBox(height: 24),
                   const Text(
-                    'Step 2: Select the specific food item',
+                    'Step 4: Results!',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    "After selecting the food item, press 'Scan Now'",
+                    "The app will analyze the image and provide you with the pH level or relevant information about the food item.",
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                     textAlign: TextAlign.center,
                   ),
@@ -85,40 +85,24 @@ class Tutorial2Screen extends StatelessWidget {
             const Spacer(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: const Color(0xFF4A7CFF),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/tutorial3');
-                      },
-                      child: const Text('Next', style: TextStyle(fontSize: 16)),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  // Continue → mark done, then go Home
+                  onPressed: () => _completeOnboarding(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4A7CFF),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: const Color(0xFF4A7CFF),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () => _completeOnboarding(context),
-                      child: const Text('Skip', style: TextStyle(fontSize: 16)),
-                    ),
+                  child: const Text(
+                    'Continue to app',
+                    style: TextStyle(fontSize: 16),
                   ),
-                ],
+                ),
               ),
             ),
             const SizedBox(height: 32),

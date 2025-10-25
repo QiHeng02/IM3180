@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Tutorial2Screen extends StatelessWidget {
-  const Tutorial2Screen({super.key});
+class Tutorial3Screen extends StatelessWidget {
+  const Tutorial3Screen({super.key});
 
   Future<void> _completeOnboarding(BuildContext context) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -23,6 +23,7 @@ class Tutorial2Screen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        automaticallyImplyLeading: true,
         title: const Text(
           'Tutorial',
           style: TextStyle(
@@ -45,16 +46,11 @@ class Tutorial2Screen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Container(
-                    width: double.infinity,
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
                     child: Image.asset(
-                      'assets/Step2.png',
-                      height: 290,
+                      'assets/Step3.png',
+                      height: 320,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) =>
                           const Center(
@@ -69,13 +65,13 @@ class Tutorial2Screen extends StatelessWidget {
                   const SizedBox(height: 16),
                   const SizedBox(height: 24),
                   const Text(
-                    'Step 2: Select the specific food item',
+                    'Step 3: Take a picture!',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    "After selecting the food item, press 'Scan Now'",
+                    "Position the pH strip or substance clearly in your camera's view.\n Ensure good lighting for accurate readings.",
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                     textAlign: TextAlign.center,
                   ),
@@ -98,7 +94,7 @@ class Tutorial2Screen extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, '/tutorial3');
+                        Navigator.pushNamed(context, '/tutorial4');
                       },
                       child: const Text('Next', style: TextStyle(fontSize: 16)),
                     ),
