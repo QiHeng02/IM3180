@@ -102,129 +102,326 @@ class ScanResultsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildSectionHeader(String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: const Color(0xFF4CAF50),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF2E7D32),
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFE8F5E9),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4CAF50).withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: color.withOpacity(0.3),
+                width: 1.5,
+              ),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: const Color(0xFFFFFDF7),
       appBar: AppBar(
-        title: const Text('Scan Results'),
-        backgroundColor: Colors.white,
+        title: const Text(
+          'Scan Results',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color(0xFFFFFDF7),
+        foregroundColor: const Color(0xFF2E7D32),
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  imageUrl,
-                  height: 220,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return const SizedBox(
-                      height: 220,
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Text(
-                      'Image failed to load',
-                      style: TextStyle(color: Colors.red),
-                    );
-                  },
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Divider(height: 1, color: Color(0xFFE8F5E9)),
+              const SizedBox(height: 24),
+
+              // Scanned Image
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFE8F5E9),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4CAF50).withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.network(
+                    imageUrl,
+                    height: 220,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return const SizedBox(
+                        height: 220,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 220,
+                        child: const Center(
+                          child: Text(
+                            'Image failed to load',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'pH Value: ${phValue.toStringAsFixed(1)}',
-              style: const TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Freshness: $freshness',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+
+              const SizedBox(height: 28),
+
+              // Analysis Results Section
+              _buildSectionHeader('Analysis Results', Icons.analytics_outlined),
+              const SizedBox(height: 12),
+
+              // Freshness info card
+              _buildInfoCard(
+                icon: freshness.toLowerCase() == 'fresh' ? Icons.check_circle :
+                      freshness.toLowerCase() == 'moderate' ? Icons.warning :
+                      Icons.error,
+                title: 'Freshness Status',
+                value: freshness,
                 color: _getFreshnessColor(),
               ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Consume within: ${hoursToConsume > 0 ? '$hoursToConsume hours' : 'Not safe to consume'}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            if (safePhMin != null && safePhMax != null) ...[
-              Text(
-                'Safe pH for ${selectedFood?.isNotEmpty == true ? selectedFood : "item"}: '
-                '${safePhMin!.toStringAsFixed(1)} - ${safePhMax!.toStringAsFixed(1)}'
-                '${isInSafeRange == null ? "" : (isInSafeRange! ? " (in range)" : " (out of range)")}',
-                style: const TextStyle(fontSize: 16),
+
+              _buildInfoCard(
+                icon: Icons.science,
+                title: 'pH Value',
+                value: phValue.toStringAsFixed(1),
+                color: const Color(0xFF4CAF50),
               ),
-              const SizedBox(height: 10),
+
+              _buildInfoCard(
+                icon: Icons.timer,
+                title: 'Consume Within',
+                value: hoursToConsume > 0 ? '$hoursToConsume hours' : 'Not safe to consume',
+                color: hoursToConsume > 24 ? const Color(0xFF4CAF50) : 
+                       hoursToConsume > 0 ? const Color(0xFFFF9800) : const Color(0xFFF44336),
+              ),
+
+              if (safePhMin != null && safePhMax != null) ...[
+                _buildInfoCard(
+                  icon: Icons.health_and_safety,
+                  title: 'Safe pH Range for ${selectedFood?.isNotEmpty == true ? selectedFood : "item"}',
+                  value: '${safePhMin!.toStringAsFixed(1)} - ${safePhMax!.toStringAsFixed(1)}'
+                          '${isInSafeRange == null ? "" : (isInSafeRange! ? " (in range)" : " (out of range)")}',
+                  color: isInSafeRange == true ? const Color(0xFF4CAF50) : const Color(0xFFFF9800),
+                ),
+              ],
+
+              const SizedBox(height: 24),
+
+              // pH Scale Section
+              _buildSectionHeader('pH Scale', Icons.linear_scale),
+              const SizedBox(height: 12),
+              
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFE8F5E9),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4CAF50).withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: _phScaleIndicator(context),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Action Buttons
+              Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2196F3).withOpacity(0.4),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Back to Scan',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFF44336), Color(0xFFD32F2F)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFF44336).withOpacity(0.4),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
+                      (route) => false,
+                    );
+                  },
+                  child: const Text(
+                    'Back to Home',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
             ],
-            const SizedBox(height: 30),
-            _phScaleIndicator(context),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF007AFF), // blue background
-                  foregroundColor: Colors.white, // white text
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Back to Scan',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                // changed from OutlinedButton
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomeScreen()),
-                    (route) => false,
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red, // red background
-                  foregroundColor: Colors.white, // white text
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Back to Home',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white, // ensure white text
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
