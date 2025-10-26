@@ -240,7 +240,7 @@ class ScanResultsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
                     imageUrl,
-                    height: 220,
+                    height: 380,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     loadingBuilder: (context, child, progress) {
