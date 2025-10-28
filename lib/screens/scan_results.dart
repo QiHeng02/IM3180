@@ -280,15 +280,14 @@ class ScanResultsScreen extends StatelessWidget {
 
               _buildInfoCard(
                 icon: Icons.timer,
-                title: 'Consume Within',
-                value: hoursToConsume > 0
-                    ? '$hoursToConsume hours'
-                    : 'Not safe to consume',
-                color: hoursToConsume > 24
-                    ? const Color(0xFF4CAF50)
-                    : hoursToConsume > 0
-                    ? const Color(0xFFFF9800)
-                    : const Color(0xFFF44336),
+                title: 'Recommendation',
+                value: () {
+                  final f = freshness.toLowerCase();
+                  if (f == 'fresh') return 'recommended to consume';
+                  if (f == 'moderate') return 'not recommended to consume';
+                  return 'not safe to consume'; // spoiled or unknown
+                }(),
+                color: _getFreshnessColor(),
               ),
 
               if (safePhMin != null && safePhMax != null) ...[
