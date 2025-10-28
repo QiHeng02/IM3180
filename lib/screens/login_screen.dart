@@ -361,12 +361,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             const Color(0xFFDB4437),
                             () => signInWithGoogle(),
                           ),
-                          const SizedBox(width: 20),
-                          _buildSocialIcon(
-                            'f',
-                            const Color(0xFF4267B2),
-                            () => _handleFacebookLogin(),
-                          ),
+                          // const SizedBox(width: 20),
+                          // _buildSocialIcon(
+                          //   'f',
+                          //   const Color(0xFF4267B2),
+                          //   () => _handleFacebookLogin(),
+                          // ),
                         ],
                       ),
 

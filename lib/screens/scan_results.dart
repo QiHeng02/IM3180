@@ -110,6 +110,7 @@ class ScanResultsScreen extends StatelessWidget {
         title: const Text('Scan Results'),
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false, // hide back arrow
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Padding(
@@ -172,14 +173,15 @@ class ScanResultsScreen extends StatelessWidget {
             const SizedBox(height: 30),
             _phScaleIndicator(context),
             const Spacer(),
+            /*  // Back to Scan (commented out)
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF007AFF), // blue background
-                  foregroundColor: Colors.white, // white text
+                  backgroundColor: Color(0xFF007AFF),
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -194,12 +196,12 @@ class ScanResultsScreen extends StatelessWidget {
                 ),
               ),
             ),
+            */
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                // changed from OutlinedButton
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
@@ -208,8 +210,8 @@ class ScanResultsScreen extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red, // red background
-                  foregroundColor: Colors.white, // white text
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -219,7 +221,7 @@ class ScanResultsScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white, // ensure white text
+                    color: Colors.white,
                   ),
                 ),
               ),

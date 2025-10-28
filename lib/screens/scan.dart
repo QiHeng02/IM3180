@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:image/image.dart' as img;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -60,13 +61,51 @@ class _ScanPageState extends State<ScanPage> {
 
     try {
       setState(() => _isProcessing = true);
-      await _initializeControllerFuture;
+      await (_initializeControllerFuture ?? Future.value());
 
       // 1) Capture image
       final xfile = await _controller!.takePicture();
       final file = File(xfile.path);
 
-      // 2) Upload to Storage
+      // 2) Crop to white grid using image package
+      final bytes = await file.readAsBytes();
+
+      // Safely decode image and fix EXIF orientation
+      final decoded = img.decodeImage(bytes);
+      if (decoded == null) {
+        throw Exception('Unable to decode image bytes');
+      }
+      final original = img.bakeOrientation(decoded);
+
+      // Optional: handle EXIF orientation here if needed (see notes)
+      final imgWidth = original.width;
+      final imgHeight = original.height;
+
+      // White grid rectangle in painter: left/top = 15%, width/height = 70%
+      final cropLeft = (imgWidth * 0.37).round();
+      final cropTop = (imgHeight * 0.37).round();
+      final cropWidth = (imgWidth * 0.40).round();
+      final cropHeight = (imgHeight * 0.40).round();
+
+      // Ensure crop is within bounds (defensive)
+      final safeLeft = cropLeft.clamp(0, imgWidth - 1).toInt();
+      final safeTop = cropTop.clamp(0, imgHeight - 1).toInt();
+      final safeWidth = cropWidth.clamp(1, imgWidth - safeLeft).toInt();
+      final safeHeight = cropHeight.clamp(1, imgHeight - safeTop).toInt();
+
+      final cropped = img.copyCrop(
+        original,
+        x: safeLeft,
+        y: safeTop,
+        width: safeWidth,
+        height: safeHeight,
+      );
+
+      // Save cropped image back to file (JPEG)
+      final croppedBytes = img.encodeJpg(cropped, quality: 100);
+      await file.writeAsBytes(croppedBytes, flush: true);
+
+      // 3) Upload to Storage
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception('Not signed in');
       final uid = user.uid;
@@ -76,11 +115,11 @@ class _ScanPageState extends State<ScanPage> {
       await ref.putFile(file);
       final downloadUrl = await ref.getDownloadURL();
 
-      // 3) Use selections passed in (fallbacks are empty)
+      // 4) Use selections passed in (fallbacks are empty)
       final selCategory = (widget.selectedCategory ?? '').trim();
       final selFood = (widget.selectedFood ?? '').trim();
 
-      // 4) Create pending scan doc to trigger Cloud Function (main.py)
+      // 5) Create pending scan doc to trigger Cloud Function
       final scanRef = FirebaseFirestore.instance
           .collection('users')
           .doc(uid)
@@ -93,13 +132,12 @@ class _ScanPageState extends State<ScanPage> {
         'imageUrl': downloadUrl,
         'selectedCategory': selCategory,
         'selectedFood': selFood,
-        // optional duplicates for compatibility
         'category': selCategory,
         'food': selFood,
         'createdAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // 5) Wait for function to finish (status != 'pending')
+      // 6) Wait for function to finish (status != 'pending')
       final snap = await scanRef.snapshots().firstWhere(
         (s) => (s.data()?['status'] ?? 'pending') != 'pending',
       );
@@ -126,16 +164,22 @@ class _ScanPageState extends State<ScanPage> {
         );
       } else {
         final msg = (data['errorMessage'] ?? 'Analysis failed').toString();
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(msg)));
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
+        }
       }
-    } catch (e) {
+    } catch (e, st) {
+      // Log or print as needed
+      // debugPrint('Scan error: $e\n$st');
       if (mounted) {
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      } else {
+        rethrow;
       }
     }
   }
