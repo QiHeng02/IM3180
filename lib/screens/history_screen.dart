@@ -33,6 +33,17 @@ class HistoryScreen extends StatelessWidget {
 
   String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
+  String _recommendationFor(String freshness) {
+    switch (freshness.toLowerCase()) {
+      case 'fresh':
+        return 'recommended to consume';
+      case 'moderate':
+        return 'not recommended to consume';
+      default:
+        return 'not safe to consume';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -174,11 +185,7 @@ class HistoryScreen extends StatelessWidget {
                                   descParts.add('pH ${ph.toStringAsFixed(1)}');
                                 descParts.add(_cap(freshness));
                                 if (hours is int) {
-                                  descParts.add(
-                                    hours > 0
-                                        ? 'Consume in $hours h'
-                                        : 'Not safe to consume',
-                                  );
+                                  descParts.add(_recommendationFor(freshness));
                                 }
                                 final description = descParts.join(' • ');
 
