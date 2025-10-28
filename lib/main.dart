@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:im3180/screens/login_screen.dart';
 import 'screens/tutorial1.dart';
 import 'screens/tutorial2.dart';
+import 'screens/tutorial3.dart';
+import 'screens/tutorial4.dart';
 import 'screens/home.dart';
 import 'screens/register_screen.dart';
 import 'screens/change_password_screen.dart';
@@ -36,6 +38,8 @@ class MyApp extends StatelessWidget {
         '/1': (context) => const RegisterScreen(),
         '/tutorial1': (context) => const Tutorial1Screen(),
         '/tutorial2': (context) => const Tutorial2Screen(),
+        '/tutorial3': (context) => const Tutorial3Screen(),
+        '/tutorial4': (context) => const Tutorial4Screen(),
         '/home': (context) => const HomeScreen(),
         '/settings': (context) => const SettingsScreen(),
         '/edit-profile': (context) => const EditProfileScreen(),

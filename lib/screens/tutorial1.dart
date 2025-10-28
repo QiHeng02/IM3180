@@ -49,8 +49,8 @@ class Tutorial1Screen extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.asset(
-                      'assets/Tutorial step 1.png',
-                      height: 220,
+                      'assets/Step1.png',
+                      height: 320,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) =>
                           const Center(
@@ -65,13 +65,13 @@ class Tutorial1Screen extends StatelessWidget {
                   const SizedBox(height: 16),
                   const SizedBox(height: 24),
                   const Text(
-                    'Step 1: Take a Picture',
+                    'Step 1: Choose the category the food item belongs to!',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    "Position the pH strip or substance clearly in your camera's view.\nEnsure good lighting for accurate readings.",
+                    "Select the category that best describes your food item from the available options. This can be done at the home screen.",
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                     textAlign: TextAlign.center,
                   ),
