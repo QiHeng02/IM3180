@@ -69,6 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String? selectedCategory;
   String? selectedFood;
 
+  bool get _canScan => selectedCategory != null && selectedFood != null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,13 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined, color: Colors.grey),
-            onPressed: () {
-              // Profile action
-            },
-          ),
+        actions: const [
+          LogoutButton(), // use the same logout button as other screens
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -188,17 +185,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   offset: const Offset(0, -50),
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, '/scan');
+                      if (_canScan) {
+                        Navigator.pushReplacementNamed(context, '/scan');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Select a category and a food item first',
+                            ),
+                          ),
+                        );
+                      }
                     },
                     child: Container(
                       width: 140,
                       height: 140,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.green[500],
+                        color: _canScan ? Colors.green[500] : Colors.grey[400],
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.green.withOpacity(0.4),
+                            color: (_canScan ? Colors.green : Colors.grey)
+                                .withOpacity(0.4),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -257,7 +265,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
-                              side: BorderSide(color: Colors.green[600]!, width: 2),
+                              side: BorderSide(
+                                color: Colors.green[600]!,
+                                width: 2,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
@@ -334,9 +345,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           child: Column(
                             children: [
-                              Icon(Icons.lightbulb_outline, 
-                                   size: 32, 
-                                   color: Colors.amber[800]),
+                              Icon(
+                                Icons.lightbulb_outline,
+                                size: 32,
+                                color: Colors.amber[800],
+                              ),
                               const SizedBox(height: 12),
                               Text(
                                 'Quick Tip: Boost flavor!',
@@ -370,9 +383,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           child: Column(
                             children: [
-                              Icon(Icons.emoji_events_outlined, 
-                                   size: 32, 
-                                   color: Colors.teal[800]),
+                              Icon(
+                                Icons.emoji_events_outlined,
+                                size: 32,
+                                color: Colors.teal[800],
+                              ),
                               const SizedBox(height: 12),
                               Text(
                                 'Daily Challenge:',
@@ -451,7 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     selectedFood = food;
                   });
                   Navigator.pop(context);
-                  
+
                   // Save to Firestore
                   final user = FirebaseAuth.instance.currentUser;
                   if (user != null) {
@@ -462,7 +477,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           'selectedCategory': selectedCategory,
                           'selectedFood': selectedFood,
                         }, SetOptions(merge: true));
-                    
+
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

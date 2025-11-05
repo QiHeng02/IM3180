@@ -27,31 +27,36 @@ class _LoginScreenState extends State<LoginScreen> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
-    debugPrint('Attempting login with email: $email');
-
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
-      debugPrint('Login successful for email: $email');
+      final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      // Create Firestore user doc if not exists
-      final user = userCredential.user;
+      final user = cred.user;
       if (user != null) {
-        final userDoc = await FirebaseFirestore.instance
+        final ref = FirebaseFirestore.instance
             .collection('users')
-            .doc(user.uid)
-            .get();
-        if (!userDoc.exists) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .set({'email': user.email, 'name': '', 'phone': ''});
-        }
-      }
+            .doc(user.uid);
+        final snap = await ref.get();
 
-      // Navigate to HomeScreen
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/tutorial1');
+        if (!snap.exists) {
+          await ref.set({
+            'email': user.email,
+            'name': '',
+            'phone': '',
+            'onboardingDone': false, // first-time flag
+          });
+        }
+
+        final done = (await ref.get()).data()?['onboardingDone'] == true;
+
+        if (mounted) {
+          Navigator.pushReplacementNamed(
+            context,
+            done ? '/home' : '/tutorial1',
+          );
+        }
       }
     } on FirebaseAuthException catch (e) {
       String message = e.message ?? 'Login failed';
@@ -59,10 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.red[400],
-          ),
+          SnackBar(content: Text(message), backgroundColor: Colors.red[400]),
         );
       }
     }
@@ -72,38 +74,41 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       // Sign out any previous Google user to force account selection
       await GoogleSignIn().signOut();
-
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return; // User cancelled
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
+      final googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // Create Firestore user doc if not exists
-      final user = userCredential.user;
+      final cred = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = cred.user;
       if (user != null) {
-        final userDoc = await FirebaseFirestore.instance
+        final ref = FirebaseFirestore.instance
             .collection('users')
-            .doc(user.uid)
-            .get();
-        if (!userDoc.exists) {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .set({'email': user.email, 'name': '', 'phone': ''});
+            .doc(user.uid);
+        final snap = await ref.get();
+
+        if (!snap.exists) {
+          await ref.set({
+            'email': user.email,
+            'name': '',
+            'phone': '',
+            'onboardingDone': false,
+          });
+        }
+
+        final done = (await ref.get()).data()?['onboardingDone'] == true;
+
+        if (mounted) {
+          Navigator.pushReplacementNamed(
+            context,
+            done ? '/home' : '/tutorial1',
+          );
         }
       }
-
-      // Navigate to Tutorial1Screen
-      Navigator.pushReplacementNamed(context, '/tutorial1');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -122,11 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFD4E7C5),
-              Color(0xFFE8F3DC),
-              Color(0xFFF0F8E8),
-            ],
+            colors: [Color(0xFFD4E7C5), Color(0xFFE8F3DC), Color(0xFFF0F8E8)],
           ),
         ),
         child: SafeArea(
@@ -206,9 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         hintText: 'E-mail',
-                        hintStyle: TextStyle(
-                          color: Colors.grey[400],
-                        ),
+                        hintStyle: TextStyle(color: Colors.grey[400]),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 24,
@@ -225,10 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: Color(0xFF7CB342),
-                        width: 2,
-                      ),
+                      border: Border.all(color: Color(0xFF7CB342), width: 2),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.08),
@@ -243,9 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: const TextStyle(color: Colors.black87),
                       decoration: InputDecoration(
                         hintText: 'Password',
-                        hintStyle: TextStyle(
-                          color: Colors.grey[400],
-                        ),
+                        hintStyle: TextStyle(color: Colors.grey[400]),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 24,
@@ -283,30 +277,24 @@ class _LoginScreenState extends State<LoginScreen> {
                               _rememberMe = value ?? false;
                             });
                           },
-                          side: BorderSide(
-                            color: Colors.grey[400]!,
-                            width: 2,
-                          ),
+                          side: BorderSide(color: Colors.grey[400]!, width: 2),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          fillColor: MaterialStateProperty.resolveWith(
-                            (states) {
-                              if (states.contains(MaterialState.selected)) {
-                                return Color(0xFF7CB342);
-                              }
-                              return Colors.transparent;
-                            },
-                          ),
+                          fillColor: MaterialStateProperty.resolveWith((
+                            states,
+                          ) {
+                            if (states.contains(MaterialState.selected)) {
+                              return Color(0xFF7CB342);
+                            }
+                            return Colors.transparent;
+                          }),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'Remember me',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -319,10 +307,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 56,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          Color(0xFF7CB342),
-                          Color(0xFF2D7D4A),
-                        ],
+                        colors: [Color(0xFF7CB342), Color(0xFF2D7D4A)],
                       ),
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
@@ -359,10 +344,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: Divider(
-                          color: Colors.grey[400],
-                          thickness: 1,
-                        ),
+                        child: Divider(color: Colors.grey[400], thickness: 1),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -376,10 +358,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       Expanded(
-                        child: Divider(
-                          color: Colors.grey[400],
-                          thickness: 1,
-                        ),
+                        child: Divider(color: Colors.grey[400], thickness: 1),
                       ),
                     ],
                   ),
@@ -402,10 +381,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 200,
                     height: 50,
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Color(0xFF7CB342),
-                        width: 2,
-                      ),
+                      border: Border.all(color: Color(0xFF7CB342), width: 2),
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: TextButton(
@@ -449,10 +425,7 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white,
-          border: Border.all(
-            color: Color(0xFF7CB342),
-            width: 2,
-          ),
+          border: Border.all(color: Color(0xFF7CB342), width: 2),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -461,11 +434,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ],
         ),
-        child: Icon(
-          icon,
-          color: color,
-          size: 28,
-        ),
+        child: Icon(icon, color: color, size: 28),
       ),
     );
   }

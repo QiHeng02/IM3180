@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as img;
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'scan_results.dart';
 
 // Accept selections from Home (optional so existing routes still work)
@@ -116,8 +116,13 @@ class _ScanPageState extends State<ScanPage> {
       final downloadUrl = await ref.getDownloadURL();
 
       // 4) Use selections passed in (fallbacks are empty)
-      final selCategory = (widget.selectedCategory ?? '').trim();
-      final selFood = (widget.selectedFood ?? '').trim();
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+      final selCategory =
+          (userDoc.data()?['selectedCategory'] as String?) ?? '';
+      final selFood = (userDoc.data()?['selectedFood'] as String?) ?? '';
 
       // 5) Create pending scan doc to trigger Cloud Function
       final scanRef = FirebaseFirestore.instance
@@ -127,14 +132,19 @@ class _ScanPageState extends State<ScanPage> {
           .doc(ts);
 
       await scanRef.set({
-        'status': 'pending',
-        'storagePath': storagePath,
-        'imageUrl': downloadUrl,
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'pending', // or 'complete' when done
         'selectedCategory': selCategory,
         'selectedFood': selFood,
         'category': selCategory,
         'food': selFood,
-        'createdAt': FieldValue.serverTimestamp(),
+        'imageUrl': downloadUrl,
+        'storagePath': storagePath,
+        'phValue': 0,
+        'freshness': 'unknown',
+        'hoursToConsume': 0,
+        'safePhMin': 0,
+        'safePhMax': 14,
       }, SetOptions(merge: true));
 
       // 6) Wait for function to finish (status != 'pending')
