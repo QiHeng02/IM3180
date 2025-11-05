@@ -14,6 +14,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _submitting = false;
 
   @override
   void dispose() {
@@ -24,42 +25,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> signup() async {
-    String name = _nameController.text.trim();
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       _showSnackBar('Please fill in all fields');
       return;
     }
 
+    setState(() => _submitting = true);
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-            email: email,
-            password: password,
-          );
+      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      // Create Firestore user doc
-      final user = userCredential.user;
+      final user = cred.user;
       if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set({
-              'email': user.email,
-              'name': name,
-              'phone': '',
-            });
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': user.email,
+          'name': name,
+          'phone': '',
+          'onboardingDone': false,
+        });
       }
 
-      // After signup, navigate to Tutorial1Screen
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/tutorial1');
-      }
+      await FirebaseAuth.instance.signOut();
+      if (mounted)
+        Navigator.pop(context, 'registered'); // go back to Login with result
     } on FirebaseAuthException catch (e) {
-      String message = e.message ?? 'Signup failed';
-      _showSnackBar(message);
+      final code = e.code;
+      final msg = code == 'email-already-in-use'
+          ? 'Account already exists. Please log in.'
+          : code == 'invalid-email'
+          ? 'Invalid email address'
+          : code == 'weak-password'
+          ? 'Password is too weak'
+          : (e.message ?? 'Signup failed');
+      _showSnackBar(msg);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
@@ -71,11 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFD4E7C5),
-              Color(0xFFE8F3DC),
-              Color(0xFFF0F8E8),
-            ],
+            colors: [Color(0xFFD4E7C5), Color(0xFFE8F3DC), Color(0xFFF0F8E8)],
           ),
         ),
         child: SafeArea(
@@ -129,11 +131,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ],
                         ),
                         child: Center(
-                          child: Icon(
-                            Icons.eco,
-                            size: 80,
-                            color: Colors.white,
-                          ),
+                          child: Icon(Icons.eco, size: 80, color: Colors.white),
                         ),
                       ),
 
@@ -154,7 +152,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: Color(0xFFF5F5F5),
+                          color: const Color(0xFFF5F5F5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: TextField(
@@ -162,13 +160,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           style: const TextStyle(color: Colors.black87),
                           decoration: InputDecoration(
                             hintText: 'Your name',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[400],
-                            ),
-                            border: InputBorder.none,
+                            hintStyle: TextStyle(color: Colors.grey[400]),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 18,
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF5F5F5),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
+                                width: 2,
+                              ),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                              borderSide: BorderSide(
+                                color: Color(0xFF7CB342),
+                                width: 2,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
                             ),
                           ),
                         ),
@@ -191,7 +208,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: Color(0xFFF5F5F5),
+                          color: const Color(0xFFF5F5F5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: TextField(
@@ -200,13 +217,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             hintText: 'example@email.com',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[400],
-                            ),
-                            border: InputBorder.none,
+                            hintStyle: TextStyle(color: Colors.grey[400]),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 18,
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF5F5F5),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
+                                width: 2,
+                              ),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                              borderSide: BorderSide(
+                                color: Color(0xFF7CB342),
+                                width: 2,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
                             ),
                           ),
                         ),
@@ -229,7 +265,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: Color(0xFFF5F5F5),
+                          color: const Color(0xFFF5F5F5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: TextField(
@@ -238,10 +274,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           style: const TextStyle(color: Colors.black87),
                           decoration: InputDecoration(
                             hintText: '••••••••',
-                            hintStyle: TextStyle(
-                              color: Colors.grey[400],
-                            ),
-                            border: InputBorder.none,
+                            hintStyle: TextStyle(color: Colors.grey[400]),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 18,
@@ -258,6 +291,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   _obscurePassword = !_obscurePassword;
                                 });
                               },
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF5F5F5),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
+                                width: 2,
+                              ),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                              borderSide: BorderSide(
+                                color: Color(0xFF7CB342),
+                                width: 2,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
                             ),
                           ),
                         ),
@@ -281,7 +336,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ],
                         ),
                         child: ElevatedButton(
-                          onPressed: signup,
+                          onPressed: _submitting ? null : signup,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
@@ -289,14 +344,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
-                            'Register',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                          child: _submitting
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Register',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
 
