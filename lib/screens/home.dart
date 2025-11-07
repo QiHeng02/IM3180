@@ -164,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Discover Peak Freshness.',
+                              'Discover Peak Freshness',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 32,
@@ -352,7 +352,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'Quick Tip: Boost flavor!',
+                                'Quick Tip: Boost freshness!',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -362,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Add fresh herbs last.',
+                                'Store food in optimal conditions to extend shelf life.',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.amber[900],
@@ -384,13 +384,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             children: [
                               Icon(
-                                Icons.emoji_events_outlined,
+                                Icons.fact_check_outlined,
                                 size: 32,
                                 color: Colors.teal[800],
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'Daily Challenge:',
+                                'Quick facts:\npH level importance',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -400,7 +400,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'What\'s your \'Fresh Find\' today?',
+                                'pH levels reveal early signs of spoilage before they’re visible.',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.teal[900],
