@@ -334,84 +334,43 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Info Cards
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.amber[300],
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.lightbulb_outline,
-                                size: 32,
-                                color: Colors.amber[800],
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Quick Tip: Boost freshness!',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Colors.amber[900],
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Store food in optimal conditions to extend shelf life.',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.amber[900],
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
+                  child: Center(
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 400), // Limit width for centering
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.green[300],
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.teal[300],
-                            borderRadius: BorderRadius.circular(16),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.fact_check_outlined,
+                            size: 32,
+                            color: Colors.black87,
                           ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.fact_check_outlined,
-                                size: 32,
-                                color: Colors.teal[800],
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Quick facts:\npH level importance',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Colors.teal[900],
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'pH levels reveal early signs of spoilage before they’re visible.',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.teal[900],
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                          const SizedBox(height: 12),
+                          Text(
+                            'Fact of the day:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'If you pick up the tofu and it feels slimy, greasy, or mushy (beyond its original firmness), it is a sign of bacterial growth and should be discarded.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
