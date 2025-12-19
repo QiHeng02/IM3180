@@ -1,16 +1,25 @@
-# im3180
+# NTU DIP Project IM3180
 
-A new Flutter project.
+A Flutter project (Mobile Application)
 
-## Getting Started
+## Setup and Installation of Application/Prototype Guide
+### Cloning the repository
+git clone https://github.com/QiHeng02/IM3180.git
 
-This project is a starting point for a Flutter application.
+### Installing relevant dependencies needed to run the code in IDE 
+flutter pub get
 
-A few resources to get you started if this is your first Flutter project:
+### Required installation to run project
+Flutter SDK (Version >=3.0)
+Python (Version >=18.0)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Running the application in VSCode 
+Android Studio Emulator (Needed to emulate and run the app on a virtual android device)
+Open android studio, go to AVD (set up android emulator medium phone)
+In VScode:
+>flutter select device
+> flutter run
+OR
+>flutter select device
+run main.dart
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
